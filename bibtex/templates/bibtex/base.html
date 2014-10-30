@@ -1,0 +1,29 @@
+{% load staticfiles %}
+
+<html>
+<head>
+	<title>The RTS Bibtex Database</title>
+	<script src="{% static 'lib/jquery-1.11.1.min.js' %}"></script>
+	<script src="{% static 'lib/sweet-alert.js' %}"></script>
+	<link rel=stylesheet href="{% static 'lib/sweet-alert.css' %}" type="text/css">
+	<link rel=stylesheet href="{% static 'style.css' %}" type="text/css">
+</head>
+
+<body>
+<div id="maincontent">
+
+{% block content %}{% endblock %}
+
+</div>
+
+<div id="footspacer"></div>
+
+<div id="footer">
+	<div id="foottext">
+		This database is solely for use by staff members of the <a href="http://www.york.ac.uk">University of York</a>.
+	</div>
+</div>
+
+</body>
+</html>
+

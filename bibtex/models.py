@@ -1,0 +1,33 @@
+import datetime
+
+from django.db import models
+from django.utils import timezone
+
+class Entry(models.Model):
+	#The username of the user who entered this entry
+	owner = models.CharField(max_length=50)
+
+	#When was this entry added to the database
+	entered = models.DateTimeField('date entered')
+
+	#Selected important fields from the bibtex
+	key = models.CharField(max_length=50)
+	title = models.CharField(max_length=200)
+	author = models.CharField(max_length=200)
+	year = models.IntegerField()
+
+	#The plain text version of the bibtex entry
+	bib = models.TextField()
+
+	def num_attached_files(self):
+		return len(self.docfile_set.all())
+	num_attached_files.short_description = "Files"
+	num_attached_files.boolean = True
+
+	def __str__(self):
+		return self.owner + "_" + self.key
+
+
+class Docfile(models.Model):
+	entry = models.ForeignKey(Entry)
+	filename = models.CharField(max_length=100)

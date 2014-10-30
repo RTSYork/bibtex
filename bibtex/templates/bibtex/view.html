@@ -1,0 +1,24 @@
+{% extends 'bibtex/base.html' %}
+{% block content %}
+
+<h1>Papers added by user <span class="username">{{username}}</span></h1>
+<p>Click on an entry to edit or delete.</p>
+
+<table class="papertable">
+<tr class="tablerowtop">
+<th>Bibtex Key</th>
+<th>Details</th>
+<th>Added on</th>
+</tr>
+{% for e in entries %}
+<tr class="{% cycle 'tablerowodd' 'tableroweven' %}">
+<td><a href="{%url 'bibtex:detail' e.pk%}">{{e.key}}</a></td>
+<td><a href="{%url 'bibtex:detail' e.pk%}">{{e.author}} - <i>{{e.title}}</i>, {{e.year}}</a></td>
+<td><a href="{%url 'bibtex:detail' e.pk%}">{{e.entered|date:"Y/m/d"}}</a></td>
+</tr>
+{% endfor %}
+</table>
+
+<p><a href="{% url 'bibtex:index' %}">Back</a></p>
+
+{% endblock %}

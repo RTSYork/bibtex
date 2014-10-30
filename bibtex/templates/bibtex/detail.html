@@ -1,0 +1,86 @@
+{% extends 'bibtex/base.html' %}
+{% block content %}
+
+<script>
+function goBack() {
+	window.location = "{% url 'bibtex:index' %}";
+}
+
+function deleteResponse(data) {
+	if(data == "OK") {
+		window.location = "{% url 'bibtex:index' %}";
+	} else {
+		//Delete failed
+		swal({title: "Error!", text: data, type: "error", confirmButtonText: "OK" });		
+	}
+}
+
+$(function() {
+	$("#deleteentry").click(function() {
+		swal({
+			title: "Confirm delete",
+			text: "Are you sure you want to delete this entry?",
+			type: "warning",
+			showCancelButton: true,
+			confirmButtonColor: "#DD6B55",
+			confirmButtonText: "Delete",
+			closeOnConfirm: false }, function() {
+				$.ajax({
+					type: "POST",
+					url: "{%url 'bibtex:delete_confirm' entry.pk %}",
+					data: {
+						csrfmiddlewaretoken: "{{ csrf_token }}"
+					},
+					success: deleteResponse
+				})
+			});
+	})
+})
+</script>
+
+
+{# Main details #}
+<h1>{{ entry.title }}</h1>
+<h2>{{ entry.author }}, {{entry.year}}</h2>
+<p class="addedline">added by {{entry.owner}} on {{entry.entered|date:"N j, Y"}}
+
+
+{# If there is an Abstract entry in the bibtex of the Entry then print it #}
+{% if abstract %}
+<h3>Abstract</h3>
+<p class="notopmargin">{{ abstract }} </p>
+{% endif %}
+
+
+{# Add download link(s) if at least one DocEntry exists for this Entry #}
+{% if docfile_set|length > 0 %}
+<h3>Download</h3>
+<ul class="filelist">
+{% for doc in docfile_set %}
+	<li><a href="">{{doc.filename}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+
+
+{# Output the raw bibtex #}
+<h3>Bibtex</h3>
+<div class="bibtex">
+<p class="nomargins"><pre class="nomargins">{{entry.bib}}</pre></p>
+</div>
+
+
+{# Actions if this is our paper #}
+{% if owner %}
+<h3>Actions</h3>
+<ul class="actionlist">
+<li><a href="{% url 'bibtex:edit' entry.pk%}">Edit</a></li>
+<li><a href="#"><span id="deleteentry">Delete</span></a></li>
+</ul>
+{% endif %}
+
+
+<p><a href="{% url 'bibtex:index' %}">Back</a></p>
+
+{% endblock %}
+

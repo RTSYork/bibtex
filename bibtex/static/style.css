@@ -1,0 +1,173 @@
+body {
+	background-color: white;
+	font-family: Sans-Serif;
+	color: #333333;
+	margin: 0;
+}
+
+a {
+	text-decoration: none;
+	color: #0066aa;
+}
+
+a:visited {
+	color: #0066aa;
+}
+
+#deleteentry {
+	color: #0066aa;
+}
+
+h1 {
+	border-bottom: 1px solid black;
+}
+
+h3 {
+	margin-bottom: 0px;
+}
+
+/* Wrap text in pre tags (used for bibtex output) */
+pre {
+    white-space: pre-wrap;       /* CSS 3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+input[type=submit] {
+	margin-top: 10px;
+	font-size: 130%;
+}
+
+textarea {
+	width: 100%;
+	border-radius: 5px;
+	border: 1px solid #777777;
+}
+
+label {
+	font-weight: bold;
+}
+
+/* IDs
+/***********************************************************************/
+
+#maincontent {
+	border: 0px solid black;
+	width: 700px;
+	padding: 10px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 20px;
+	border-radius: 5px;
+}
+
+#footer {
+	display: table;
+	font-size: 70%;
+	color: #aaaaaa;
+	text-align: center;
+	position: fixed;
+	bottom: 0;
+	height: 50px;
+	width: 100%;
+	background-image: url('images/uoylogo.png'), url('images/rtslogo-white.png');
+	background-position: 10px 10px, right 5px;
+	background-repeat: no-repeat;
+	background-color: #18453B;
+}
+
+#foottext {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#foottext a {
+	color: #99ddbb;
+}
+
+#footspacer {
+	height: 50px;
+}
+
+
+/* Classes
+/***********************************************************************/
+
+.submit {
+	background-color: #18453B;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 10px;
+	font-weight: bold;
+	display:inline-block;
+	color:white;
+}
+.submit:hover {background-color: #38655B;}
+
+
+.centre {
+	text-align:center;
+}
+
+.error {
+	color: red;
+}
+
+.notopmargin {
+	margin-top: 0px;
+}
+
+.nomargins {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.addedline {
+	font-size: 80%;
+	color: #666666;
+	margin-top: -15px;
+}
+
+.username {
+	font-weight: bold;
+	font-style: italic;
+}
+
+.bibtex {
+	margin: 5px;
+	padding: 5px;
+	font-family: monospace;
+	background-color: #dddddd;
+	border-radius: 5px;
+}
+
+
+.nobullets {
+    padding: 0;
+    list-style-type: none;
+}
+
+/* Tables */
+/*************************************************************/
+.papertable td, .papertable th {
+	padding: 5px;
+	margin: 0px;
+}
+
+.papertable {
+	border-spacing: 0px;
+	border-collapse: separate;
+}
+
+.papertable a {
+	color: #333333;
+}
+
+.tablerowtop {background-color: #b0c0ee;}
+.tablerowodd {background-color: #d9e9ff;}
+.tablerowodd:hover {background-color: #f0f6ff;}
+.tableroweven {background-color: #e2f2ff;}
+.tableroweven:hover {background-color: #f0f6ff;}
+

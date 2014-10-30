@@ -1,0 +1,85 @@
+{% extends 'bibtex/base.html' %}
+{% block content %}
+
+<script>
+function goBack() {
+	window.location = "{% url 'bibtex:index' %}";
+}
+
+function validateResp(data) {
+	if(data == "OK") {
+		swal({title: "Success", 
+			text: "Paper sucessfully added to the database", 
+			type: "success", confirmButtonText: "OK" }, goBack);
+	} else swal({title: "Error!", text: data, type: "error", confirmButtonText: "OK" });
+}
+
+function validateEditResp(data) {
+	if(data == "OK") {
+		swal({title: "Success", 
+			text: "Entry sucessfully edited", 
+			type: "success", confirmButtonText: "OK" }, goBack);
+	} else swal({title: "Error!", text: data, type: "error", confirmButtonText: "OK" });
+}
+
+$(function() {
+	$("#bibtexaddform .submit").click(function() {
+		$.ajax({
+			type: "POST",
+			url: "{%url 'bibtex:validate' %}",
+			data: { 
+				csrfmiddlewaretoken: "{{ csrf_token }}",
+				bib: $("#bibtexaddform textarea").val(),
+				{% if entry %}
+				edit: "edit",
+				pk: {{ entry.pk }},
+				{% endif %}
+			},
+			{% if entry %}
+			success: validateEditResp
+			{% else %}
+			success: validateResp
+			{% endif %}
+		})
+	});
+})
+</script>
+
+
+{% if username %}
+
+{% if not entry %}
+<h1>Add an entry to the database</h1>
+
+<p>You are adding as the user <span class="username">{{username}}</span>. In order to edit this entry in the future you will have to use the same user account. If this is incorrect, please log out and log in as a different user.</p>
+{% else %}
+<h1>Edit an entry</h1>
+{% endif %}
+
+<p>Please ensure that your Bibtex has <tt>title</tt>, <tt>author</tt> and <tt>year</tt> fields, and you should include an <tt>abstract</tt> field if possible.</p>
+
+{% if not entry %}
+<form action="#" method="post" id="bibtexaddform"> 
+{% else %}
+<form action="#" method="post" id="bibtexaddform">
+{% endif %}
+	{% csrf_token %}
+	<div>
+		<div><label for="bibtex">Raw bibtex input:</label></div>
+		<textarea cols="60" rows="15" name="bibtex">{{entry.bib}}</textarea>
+	</div>
+	<div class="centre">
+		<div class="submit">Submit</div>
+	</div>
+</form>
+
+
+{% else %}
+
+<h1>Not logged in</h1>
+<p>You are not logged in to the departmental webpages.</p>
+{% endif %}
+
+<p><a href="{% url 'bibtex:index' %}">Back</a></p>
+
+{% endblock %}

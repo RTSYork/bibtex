@@ -69,22 +69,30 @@ def search(request):
 
 
 def getsearch(request):
-	if not 'term' in request.POST: return HttpResponse("")
-	query_string = request.POST['term'].strip()
+	vars = None
+	if request.method == 'GET': vars = request.GET
+	else: vars = request.POST
+
+	if not 'term' in vars: query_string = ""
+	else: query_string = vars['term'].strip()
+
 	search_fields = []
-	if 'search_title' in request.POST: search_fields.append('title')
-	if 'search_author' in request.POST: search_fields.append('author')
-	if 'search_all' in request.POST: search_fields.append('bib')
+	if 'search_title' in vars: search_fields.append('title')
+	if 'search_author' in vars: search_fields.append('author')
+	if 'search_all' in vars: search_fields.append('bib')
 	entry_query = library.get_query(query_string, search_fields)
 	if entry_query:
 		found_entries = Entry.objects.filter(entry_query).order_by('-entered')
 	else:
 		found_entries = Entry.objects.order_by("-entered")
 
-	if 'fromyear' in request.POST: found_entries = found_entries.filter(year__gte=int(request.POST['fromyear']))
-	if 'toyear' in request.POST: found_entries = found_entries.filter(year__lte=int(request.POST['toyear']))
+	if 'fromyear' in vars: found_entries = found_entries.filter(year__gte=int(vars['fromyear']))
+	if 'toyear' in vars: found_entries = found_entries.filter(year__lte=int(vars['toyear']))
 
-	return render(request, 'bibtex/searchresults.html', {'results': found_entries})
+	if request.method == 'GET':
+		return render(request, 'bibtex/searchresults_plain.html', {'results': found_entries})
+	else:
+		return render(request, 'bibtex/searchresults.html', {'results': found_entries})
 
 
 def validate(request):

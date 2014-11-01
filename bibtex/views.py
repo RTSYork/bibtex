@@ -36,10 +36,11 @@ def detail(request, epk):
 
 
 def add(request):
-	return render(request, 'bibtex/add.html', {
-		'username': library.get_username(),
-		'entry': None
-	})
+	if library.get_username != "":
+		return render(request, 'bibtex/add.html', {
+			'username': library.get_username(),
+			'entry': None
+		})
 
 
 def edit(request, epk):
@@ -87,40 +88,42 @@ def getsearch(request):
 
 
 def validate(request):
-	error = library.validate_bibtex(request.POST['bib'])
-	db = None
-	if not error:
-		#If not editing, check the key is not already used (not strictly required but will assist with export)
-		db = library.parse_bibstring(request.POST['bib'])
-		if not 'edit' in request.POST:
-			if len(Entry.objects.filter(key=db.entries[0]['id'])) > 0:
-				error = "The key " + str(db.entries[0]['id']) + " is already present in the database."
+	if library.get_username != "":
+		error = library.validate_bibtex(request.POST['bib'])
+		db = None
+		if not error:
+			#If not editing, check the key is not already used (not strictly required but will assist with export)
+			db = library.parse_bibstring(request.POST['bib'])
+			if not 'edit' in request.POST:
+				if len(Entry.objects.filter(key=db.entries[0]['id'])) > 0:
+					error = "The key " + str(db.entries[0]['id']) + " is already present in the database."
 
-	if not error:
-		#All ok, add the details
-		if 'edit' in request.POST:
-			#Edit the existing entry
-			entry = get_object_or_404(Entry, pk=request.POST['pk'])
-			entry.entered = datetime.utcnow()
-			entry.key = db.entries[0]['id']
-			entry.title = library.strip_braces(db.entries[0]['title'])
-			entry.author = db.entries[0]['author']
-			entry.year = db.entries[0]['year']
-			entry.bib = request.POST['bib']
-			entry.save()
+		if not error:
+			#All ok, add the details
+			if 'edit' in request.POST:
+				#Edit the existing entry
+				entry = get_object_or_404(Entry, pk=request.POST['pk'])
+				if entry.owner == library.get_username():		
+					entry.entered = datetime.utcnow()
+					entry.key = db.entries[0]['id']
+					entry.title = library.strip_braces(db.entries[0]['title'])
+					entry.author = db.entries[0]['author']
+					entry.year = db.entries[0]['year']
+					entry.bib = request.POST['bib']
+					entry.save()
+			else:
+				#Add a new entry
+				Entry.objects.create(
+					owner = library.get_username(),
+					entered = datetime.utcnow(),
+					key = db.entries[0]['id'],
+					title = library.strip_braces(db.entries[0]['title']),
+					author = db.entries[0]['author'],
+					year = db.entries[0]['year'],
+					bib = request.POST['bib'],
+				)
+			return HttpResponse("OK")
 		else:
-			#Add a new entry
-			Entry.objects.create(
-				owner = library.get_username(),
-				entered = datetime.utcnow(),
-				key = db.entries[0]['id'],
-				title = library.strip_braces(db.entries[0]['title']),
-				author = db.entries[0]['author'],
-				year = db.entries[0]['year'],
-				bib = request.POST['bib'],
-			)
-		return HttpResponse("OK")
-	else:
-		return HttpResponse(error)
+			return HttpResponse(error)
 
 

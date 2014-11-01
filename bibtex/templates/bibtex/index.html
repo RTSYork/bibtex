@@ -2,12 +2,16 @@
 {% block content %}
 
 <h1>RTS Bibtex Database</h1>
+{% if username != "" %}
 <p>You are logged in as user <span class="username">{{username}}</span>. 
+{% endif %}
 
 <h3>Actions</h3>
 <ul class="actionlist">
+{% if username != "" %}
 <li><a href="{% url 'bibtex:add' %}">Add a paper to the database</a></li>
 <li><a href="{% url 'bibtex:view' %}">View/edit papers you have added</a></li>
+{% endif %}
 <li><a href="{% url 'bibtex:search' %}">Search the database</a></li>
 </ul>
 
@@ -18,8 +22,9 @@
 {% endfor %}
 </ul>
 
-
+{% if username != "" %}
 <p>&nbsp;</p>
 <p>Please report any bugs, problems, or suggestions to <a href="mailto:ian.gray@york.ac.uk">Ian Gray</a>.</p>
+{% endif %}
 
 {% endblock %}

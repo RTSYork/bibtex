@@ -103,7 +103,7 @@ def validate(request):
 			entry = get_object_or_404(Entry, pk=request.POST['pk'])
 			entry.entered = datetime.utcnow()
 			entry.key = db.entries[0]['id']
-			entry.title = db.entries[0]['title']
+			entry.title = library.strip_braces(db.entries[0]['title'])
 			entry.author = db.entries[0]['author']
 			entry.year = db.entries[0]['year']
 			entry.bib = request.POST['bib']
@@ -114,7 +114,7 @@ def validate(request):
 				owner = library.get_username(),
 				entered = datetime.utcnow(),
 				key = db.entries[0]['id'],
-				title = db.entries[0]['title'],
+				title = library.strip_braces(db.entries[0]['title']),
 				author = db.entries[0]['author'],
 				year = db.entries[0]['year'],
 				bib = request.POST['bib'],

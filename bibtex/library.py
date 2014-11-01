@@ -60,6 +60,18 @@ def normalize_query(query_string,
     '''
     return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)] 
 
+
+
+def strip_braces(text):
+	'''
+	Removes curly braces { and } from a string, unless those braces are escaped with
+	a preceeding backslash: \{ \}
+	The unholy regex uses negative lookbehind.
+	'''
+	return re.compile(r'(?<!\\)\{|(?<!\\)\}', flags=re.UNICODE).sub("", text)
+
+
+
 def get_query(query_string, search_fields):
     ''' Returns a query, that is a combination of Q objects. That combination
         aims to search keywords within a model by testing the given search fields.

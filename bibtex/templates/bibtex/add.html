@@ -7,7 +7,7 @@ function goBack() {
 }
 
 function validateResp(data) {
-	if(data == "OK") {
+	if(data.slice(0,2) == "OK") {
 		swal({title: "Success", 
 			text: "Paper sucessfully added to the database", 
 			type: "success", confirmButtonText: "OK" }, goBack);
@@ -15,7 +15,7 @@ function validateResp(data) {
 }
 
 function validateEditResp(data) {
-	if(data == "OK") {
+	if(data.slice(0,2) == "OK") {
 		swal({title: "Success", 
 			text: "Entry sucessfully edited", 
 			type: "success", confirmButtonText: "OK" }, goBack);

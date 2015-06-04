@@ -121,7 +121,7 @@ def validate(request):
 					entry.save()
 			else:
 				#Add a new entry
-				Entry.objects.create(
+				entry = Entry.objects.create(
 					owner = library.get_username(),
 					entered = datetime.utcnow(),
 					key = db.entries[0]['id'],
@@ -130,7 +130,7 @@ def validate(request):
 					year = db.entries[0]['year'],
 					bib = request.POST['bib'],
 				)
-			return HttpResponse("OK")
+			return HttpResponse("OK" + str(entry.pk))
 		else:
 			return HttpResponse(error)
 

@@ -1,9 +1,11 @@
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
-import re
-import sys
-import logging
+import re, sys, logging, os
+
 from django.db.models import Q
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 
 def parse_bibstring(bibstring):
@@ -23,7 +25,6 @@ def get_entry_bibtex_data(bibstring, data):
 	try:
 		return db.entries[0][data]
 	except KeyError:
-		print("key")
 		#Key does not exist
 		return None
 
@@ -49,28 +50,34 @@ def validate_bibtex(bibstring):
 	return None
 
 
-def write_file(file, desiredfilename):
+def write_file(uploadedfile, origfilename):
+	"""
+	Write the file into MEDIA_ROOT
+	Will check if there already is a file with that name, and if so, add _x onto the end of the name
+	(but before the extension), where x is a positive integer.
+	"""
 	try:
-		#outfile = open("/Users/ian/Downloads/tempout", "wb")
-		#outfile.write(f)
-		#outfile.close()
-		return "somefile"
-	except:
-		e = sys.exc_info()[0]
-		logger = logging.getLogger(__name__)
-		logger.error(str(e))
+		name, ext = os.path.splitext(origfilename)
+		if default_storage.exists(name + ext):
+			add = 1
+			while default_storage.exists(name + "_" + str(add) + ext):
+				add = add + 1
+			outfname = name + "_" + str(add) + ext
+		else:
+			outfname = name + ext
+
+		path = default_storage.save(outfname, ContentFile(uploadedfile.read()))
+		print path
+		return path
+	except Exception as e:
+		print str(e.message)
+		#logger = logging.getLogger(__name__)
+		#logger.error(str(e))
 		return None
 
 
 def get_username():
 	return "iang"
-
-
-def get_ftp_path():
-	return "/Users/ian/Downloads/ftp/"
-
-def get_ftp_web_path():
-	return "ftp://ftp.cs.york.ac.uk/papers/rtspapers/"
 
 
 def normalize_query(query_string,

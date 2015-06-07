@@ -4,6 +4,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django import forms
+from django.conf import settings
 
 from bibtex.models import Entry, Docfile
 import bibtex.library as library
@@ -27,16 +28,10 @@ def view(request):
 
 def detail(request, epk):
 	entry = get_object_or_404(Entry, pk=epk)
-
-	print "@@"
-	print entry.bib
-	print library.get_entry_bibtex_data(entry.bib, 'abstract')
-	print "@@"
-
 	return render(request, 'bibtex/detail.html', {
 		'entry': entry, 
 		'docfile_set': entry.docfile_set.all(),
-		'ftpbase': library.get_ftp_web_path(),
+		'ftpbase': settings.MEDIA_URL,
 		'abstract': library.get_entry_bibtex_data(entry.bib, 'abstract'),
 		'owner': (entry.owner == library.get_username()),
 	})
@@ -56,7 +51,7 @@ def edit(request, epk):
 	return render(request, 'bibtex/add.html', {
 		'username': library.get_username(),
 		'docfile_set': entry.docfile_set.all(),
-		'ftpbase': library.get_ftp_web_path(),
+		'ftpbase': settings.MEDIA_URL,
 		'entry': entry
 	})
 
@@ -76,7 +71,9 @@ def add_file(request, epk):
 		if not 'file' in request.FILES:
 			return HttpResponse("No file was submitted.")
 
-		filename = library.write_file(request.FILES['file'], "somename")
+		origfilename = request.FILES['file']._name
+		filename = library.write_file(request.FILES['file'], origfilename)
+
 		if filename != None:
 			doc = Docfile.objects.create(entry = entry, filename = filename)
 		else:

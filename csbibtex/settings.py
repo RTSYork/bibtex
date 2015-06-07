@@ -83,3 +83,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# File storage
+
+MEDIA_ROOT = "/Users/ian/Downloads/ftp/"
+MEDIA_URL = "ftp://ftp.cs.york.ac.uk/papers/rtspapers/"
+

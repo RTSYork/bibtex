@@ -27,9 +27,16 @@ def view(request):
 
 def detail(request, epk):
 	entry = get_object_or_404(Entry, pk=epk)
+
+	print "@@"
+	print entry.bib
+	print library.get_entry_bibtex_data(entry.bib, 'abstract')
+	print "@@"
+
 	return render(request, 'bibtex/detail.html', {
 		'entry': entry, 
 		'docfile_set': entry.docfile_set.all(),
+		'ftpbase': library.get_ftp_web_path(),
 		'abstract': library.get_entry_bibtex_data(entry.bib, 'abstract'),
 		'owner': (entry.owner == library.get_username()),
 	})
@@ -48,6 +55,8 @@ def edit(request, epk):
 	if epk != None: entry = get_object_or_404(Entry, pk=epk)
 	return render(request, 'bibtex/add.html', {
 		'username': library.get_username(),
+		'docfile_set': entry.docfile_set.all(),
+		'ftpbase': library.get_ftp_web_path(),
 		'entry': entry
 	})
 
@@ -59,6 +68,33 @@ def delete_confirm(request, epk):
 		return HttpResponse("OK")
 	else:
 		return HttpResponse("You do not own this entry.")
+
+
+def add_file(request, epk):
+	entry = get_object_or_404(Entry, pk=epk)
+	if entry.owner == library.get_username():
+		if not 'file' in request.FILES:
+			return HttpResponse("No file was submitted.")
+
+		filename = library.write_file(request.FILES['file'], "somename")
+		if filename != None:
+			doc = Docfile.objects.create(entry = entry, filename = filename)
+		else:
+			return HttpResponse("Error whilst saving file. Please contact the database admin.")
+		return HttpResponse("OK" + str(filename))
+	else:
+		return HttpResponse("You do not own the entry this file is attached to.")
+
+
+def delete_file(request, epk):
+	docfile = get_object_or_404(Docfile, pk=epk)
+	entry = docfile.entry
+	if entry.owner == library.get_username():
+		docfile.delete()
+		return HttpResponse("OK")
+	else:
+		return HttpResponse("You do not own the entry this file is attached to.")
+
 
 
 def search(request):
@@ -130,8 +166,18 @@ def validate(request):
 					year = db.entries[0]['year'],
 					bib = request.POST['bib'],
 				)
-			return HttpResponse("OK" + str(entry.pk))
+
+			#Now, do we also have a file to upload?
+			if 'file' in request.FILES:
+				filename = library.write_file(request.FILES['file'], "somename")
+				if filename != None:
+					doc = Docfile.objects.create(entry = entry, filename = filename)
+				else:
+					return HttpResponse("BADFILE" + str(entry.pk))
+
+			#All OK
+			resp = HttpResponse("OK" + str(entry.pk))
+			return resp
 		else:
-			return HttpResponse(error)
-
-
+			resp = HttpResponse(error)
+			return resp

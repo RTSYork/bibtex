@@ -10,7 +10,6 @@ function deleteResponse(data) {
 	if(data == "OK") {
 		window.location = "{% url 'bibtex:index' %}";
 	} else {
-		//Delete failed
 		swal({title: "Error!", text: data, type: "error", confirmButtonText: "OK" });		
 	}
 }
@@ -57,7 +56,7 @@ $(function() {
 <h3>Download</h3>
 <ul class="filelist">
 {% for doc in docfile_set %}
-	<li><a href="">{{doc.filename}}</a></li>
+	<li><a href="{{ftpbase}}{{doc.filename}}">{{doc.filename}}</a></li>
 {% endfor %}
 </ul>
 {% endif %}

@@ -12,6 +12,9 @@ urlpatterns = patterns('',
 	url(r'^view$', views.view, name='view'),
 	url(r'^delete_confirm/(?P<epk>\d+)/$', views.delete_confirm, name='delete_confirm'),
 
+	url(r'^add_file/(?P<epk>\d+)/$', views.add_file, name='add_file'),
+	url(r'^delete_file/(?P<epk>\d+)/$', views.delete_file, name='delete_file'),
+
 	url(r'^search$', views.search, name='search'),
 	url(r'^getsearch$', views.getsearch, name='getsearch'),
 

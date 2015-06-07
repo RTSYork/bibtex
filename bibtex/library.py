@@ -1,13 +1,19 @@
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
 import re
+import sys
+import logging
 from django.db.models import Q
 
 
 def parse_bibstring(bibstring):
 	parser = BibTexParser()
 	parser.ignore_nonstandard_types = False
-	return bibtexparser.loads(bibstring, parser)
+	"""
+	The \n is added to the bibstring because it appears that the final entry is not 
+	correctly parsed if there is no trailing newline.
+	"""
+	return bibtexparser.loads(bibstring + "\n", parser)
 
 def get_entry_bibtex_data(bibstring, data):
 	db = parse_bibstring(bibstring)
@@ -43,10 +49,28 @@ def validate_bibtex(bibstring):
 	return None
 
 
+def write_file(file, desiredfilename):
+	try:
+		#outfile = open("/Users/ian/Downloads/tempout", "wb")
+		#outfile.write(f)
+		#outfile.close()
+		return "somefile"
+	except:
+		e = sys.exc_info()[0]
+		logger = logging.getLogger(__name__)
+		logger.error(str(e))
+		return None
+
 
 def get_username():
 	return "iang"
 
+
+def get_ftp_path():
+	return "/Users/ian/Downloads/ftp/"
+
+def get_ftp_web_path():
+	return "ftp://ftp.cs.york.ac.uk/papers/rtspapers/"
 
 
 def normalize_query(query_string,

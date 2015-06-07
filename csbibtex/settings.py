@@ -12,10 +12,6 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 from csbibtex.settings_secret import *
 
@@ -90,3 +86,11 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = "/Users/ian/Downloads/ftp/"
 MEDIA_URL = "ftp://ftp.cs.york.ac.uk/papers/rtspapers/"
 
+
+# Email
+EMAIL_HOST = ""
+EMAIL_PORT = 22
+EMAIL_HOST_USER = "user"
+EMAIL_HOST_PASSWORD = "pass"
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False

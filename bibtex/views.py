@@ -1,13 +1,15 @@
 from datetime import datetime
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, HttpRequest, Http404, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django import forms
 from django.conf import settings
+from django.core.mail import send_mail
 
 from bibtex.models import Entry, Docfile
 import bibtex.library as library
+import string
 
 
 def index(request):
@@ -129,7 +131,7 @@ def getsearch(request):
 
 
 def validate(request):
-	if library.get_username != "":
+	if library.get_username() != "":
 		error = library.validate_bibtex(request.POST['bib'])
 		db = None
 		if not error:
@@ -173,6 +175,38 @@ def validate(request):
 					return HttpResponse("BADFILE" + str(entry.pk))
 
 			#All OK
+
+			#Maybe send an email
+			if 'email' in request.POST:
+				mailtemplate = """$user has added a new paper to the RTS database. It can be viewed at:
+$link
+
+Paper details:
+Title: $title
+Author: $author
+"""
+				if 'abstract' in db.entries[0]:
+					mailtemplate = mailtemplate + "Abstract: " + db.entries[0]['abstract'] + "\n"
+				mailtemplate = mailtemplate + "\n\nBibtex: $bibtex" + "\n"
+
+				mailbody = string.Template(mailtemplate).substitute({
+					'user': library.get_username(),
+					'link': request.build_absolute_uri(reverse('bibtex:detail', args=[entry.pk])),
+					'title': entry.title,
+					'author': entry.author,
+					'bibtex': entry.bib
+				})
+
+				try:
+					pass
+					#send_mail("New paper published", 
+					#	mailbody, 
+					#	'rtsbibtex-no-reply@cs.york.ac.uk', 
+					#	['rts-group@york.ac.uk'],
+					#	fail_silently=False)
+				except:
+					pass
+
 			resp = HttpResponse("OK" + str(entry.pk))
 			return resp
 		else:

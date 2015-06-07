@@ -168,7 +168,8 @@ def validate(request):
 
 			#Now, do we also have a file to upload?
 			if 'file' in request.FILES:
-				filename = library.write_file(request.FILES['file'], "somename")
+				origfilename = request.FILES['file']._name
+				filename = library.write_file(request.FILES['file'], origfilename)
 				if filename != None:
 					doc = Docfile.objects.create(entry = entry, filename = filename)
 				else:

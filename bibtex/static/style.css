@@ -106,6 +106,13 @@ label {
 }
 .submit:hover {background-color: #38655B;}
 
+.submitdisabled {
+	color:#DDDDDD;
+	background-color: #78655B;
+}
+.submitdisabled:hover {background-color: #78655B;}
+
+
 .editbox {
 	background-color: #eeeeee;
 	border-radius: 5px;

@@ -27,9 +27,7 @@ $(function() {
 				$.ajax({
 					type: "POST",
 					url: "{%url 'bibtex:delete_confirm' entry.pk %}",
-					data: {
-						csrfmiddlewaretoken: "{{ csrf_token }}"
-					},
+					data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
 					success: deleteResponse
 				})
 			});

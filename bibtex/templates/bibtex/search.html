@@ -48,6 +48,8 @@ $(function() {
 
 <h1>Search the database</h1>
 
+<p>Use this form to search the RTS papers database. If you leave the search box empty then the search will return all papers. The From and To boxes have automatically been filled to cover the entire range of papers in the database.</p>
+
 <form>
 <label>Search for: <input type="text" id="searchterm" onKeyPress="check_for_enter(event, this)"></label>
 
@@ -57,8 +59,8 @@ $(function() {
 <li><label><input type="checkbox" id="search_all"> Entire entry</label></li>
 </ul>
 <p>
-<label>From: <input type="text" id="fromyear" value="{{fromyear}}" size=4 onKeyPress="check_for_enter(event, this)"></label>
-<label>To: <input type="text" id="toyear" value="{{toyear}}" size=4 onKeyPress="check_for_enter(event, this)"></label>
+<label>From: </label><input type="text" id="fromyear" value="{{fromyear}}" size=4 onKeyPress="check_for_enter(event, this)">
+<label>To: </label><input type="text" id="toyear" value="{{toyear}}" size=4 onKeyPress="check_for_enter(event, this)">
 </p>
 <span class="submit" id="searchbutton">Search</span>
 </form>

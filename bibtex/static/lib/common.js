@@ -16,7 +16,7 @@ function reenableSubmitButtons() {
 function swalError(error) {
 	swal({
 		title: "Error!", 
-		text: text, 
+		text: error, 
 		type: "error", 
 		confirmButtonText: "OK" 
 	});

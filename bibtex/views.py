@@ -129,6 +129,14 @@ def getsearch(request):
 		return render(request, 'bibtex/searchresults.html', {'results': found_entries})
 
 
+def searchkey(request):
+	if 'key' in request.POST:
+		if len(Entry.objects.filter(key__iexact=request.POST['key'])) > 0:
+			return HttpResponse("YES")
+		else:
+			return HttpResponse("NO")
+
+
 def addedit(request):
 	if library.get_username() == "":
 		return HttpResponse("Bad request.")

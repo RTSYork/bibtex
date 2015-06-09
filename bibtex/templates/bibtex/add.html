@@ -3,9 +3,13 @@
 {% block content %}
 
 <script src="{% static 'lib/bibtexentry.js' %}"></script>
+<script src="{% static 'lib/parse-bibtex.js' %}"></script>
 
 <script>
 "use strict";
+
+var typingTimer;
+var doneTypingInterval = 700;
 
 function goBack() { window.location = "{% url 'bibtex:index' %}"; }
 
@@ -85,6 +89,10 @@ function validate(data, jqForm, options) {
 }
 
 
+function checkBibtexKeyLive() {
+	checkBibtexKey($('textarea#rawbibtexentry').val(), "{% url 'bibtex:searchkey' %}", "{{csrf_token}}");
+}
+
 $(function() {
 	$("#rawbibtexlink").click(function() {
 		$("#basicadd").hide();
@@ -127,9 +135,18 @@ $(function() {
 			$(this).addClass("submitdisabled");
 		});
 	});
-})
-</script>
 
+	$('textarea#rawbibtexentry').keyup(function() {
+		clearTimeout(typingTimer);
+		if ($('textarea#rawbibtexentry').val) {
+			typingTimer = setTimeout(checkBibtexKeyLive, doneTypingInterval);
+		}
+	});
+})
+
+
+
+</script>
 
 {% if username %}
 
@@ -209,7 +226,7 @@ $(function() {
 		<div>
 			<div><label for="bibtex">Raw bibtex input:</label></div>
 			<textarea cols="60" rows="15" name="bib" id="rawbibtexentry">{{entry.bib}}</textarea>
-		</div><p></p>
+		</div><div id="keysearchresults"></div><p></p>
 	</div>
 
 	<div>

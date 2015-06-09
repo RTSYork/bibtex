@@ -31,6 +31,39 @@ var bibtexfields_optional = {
 }
 
 
+var keyChecked = ""
+
+function checkBibtexKey(bib, checkurl, csrf) {
+	try {
+		var entries = doBibtexParse(bib);
+
+		if("@comments" in entries) {
+			delete entries["@comments"];
+		}
+
+		if(Object.keys(entries).length == 1) {
+			var key = Object.keys(entries)[0];
+			keyChecked = key;
+			$.ajax({
+				type: "POST",
+				url: checkurl,
+				data: {key: key, csrfmiddlewaretoken: csrf},
+				success: checkBibtexKeyReply
+			});
+		}
+	} catch(err) {
+		console.log("Error " + err);
+	}
+}
+
+function checkBibtexKeyReply(data) {
+	if(data.startsWith("YES")) {
+		$('#keysearchresults').html("<p class='error'>The key " + keyChecked + " already exists in the database. Please select another.</p>");
+	} else {
+		$('#keysearchresults').html("")
+	}
+}
+
 function bibtexInputTypeClick(obj) {
 	if(obj.name == "entrytype") {
 		//Hide all fields

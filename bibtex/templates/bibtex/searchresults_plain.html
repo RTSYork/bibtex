@@ -1,3 +1,9 @@
-{% for e in results %}
+{% if output == "plain" %}
+	{% for e in results %}
 <p class="paperentry"><a href="{%url 'bibtex:detail' e.pk%}"><span class="papertitle">{{e.title}}</span> <span class="paperauthor">{{e.author}}</span>, {{e.year}}</a></p>
-{% endfor %}
+	{% endfor %}
+{% elif output == "bibtex" %}
+	{% for e in results %}
+{{e.bib}}
+	{% endfor %}
+{% endif %}

@@ -2,6 +2,8 @@
 {% block content %}
 
 <script>
+"use strict";
+
 function goBack() {
 	window.location = "{% url 'bibtex:index' %}";
 }
@@ -10,27 +12,19 @@ function deleteResponse(data) {
 	if(data == "OK") {
 		window.location = "{% url 'bibtex:index' %}";
 	} else {
-		swal({title: "Error!", text: data, type: "error", confirmButtonText: "OK" });		
+		swalError(data);	
 	}
 }
 
 $(function() {
 	$("#deleteentry").click(function() {
-		swal({
-			title: "Confirm delete",
-			text: "Are you sure you want to delete this entry?",
-			type: "warning",
-			showCancelButton: true,
-			confirmButtonColor: "#FF5B55",
-			confirmButtonText: "Delete",
-			closeOnConfirm: false }, function() {
+		swalWarn("Confirm delete", "Are you sure you want to delete this entry?", "Delete", function() {
 				$.ajax({
 					type: "POST",
 					url: "{%url 'bibtex:delete_confirm' entry.pk %}",
 					data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
 					success: deleteResponse
-				})
-			});
+				})});
 	})
 })
 </script>

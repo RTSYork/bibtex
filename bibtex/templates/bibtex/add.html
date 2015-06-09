@@ -7,6 +7,8 @@
 <script>
 "use strict";
 
+function goBack() { window.location = "{% url 'bibtex:index' %}"; }
+
 function handleServerResponse(text, responseText, statusText, xhr, $form) {
 	{% if not entry %}
 	var msgtext = "Paper sucessfully added to the database";
@@ -16,28 +18,18 @@ function handleServerResponse(text, responseText, statusText, xhr, $form) {
 	reenableSubmitButtons();
 
 	if(text.startsWith("BADFILE")) {
-		swal({	title: "Warning", 
-				text: "Your bibtex was accepted, but an error occurred trying to upload your file. Try editing your newly-added paper to add the file separately.", 
-				type: "warning"}, 
-				function() { window.location = "{% url 'bibtex:index' %}"; }
-			);
+		swal({title: "Warning", 
+			text: "Your bibtex was accepted, but an error occurred trying to upload your file. Try editing your newly-added paper to add the file separately.", 
+			type: "warning"}, goBack);
 	} else if(text.startsWith("OK")) {
-		swal({	title: "Success", 
-				text: msgtext, 
-				type: "success"}, 
-				function() { window.location = "{% url 'bibtex:index' %}"; }
-			);
+		swal({title: "Success", text: msgtext, type: "success"}, goBack);
 	} else swalError(text);
 }
 
 function handleServerResponseAddFile(text, responseText, statusText, xhr, $form) {
 	reenableSubmitButtons();
 	if(text.startsWith("OK")) {
-		swal({	title: "Success", 
-				text: "File uploaded.", 
-				type: "success"}, 
-				function() { window.location = "{% url 'bibtex:index' %}"; }
-			);
+		swal({title: "Success", text: "File uploaded.", type: "success"}, goBack);
 	} else swalError(text);
 }
 

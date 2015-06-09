@@ -1,12 +1,14 @@
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
-import re, sys, logging, os
+import re, sys, logging, os, string
+
+from bibtex.models import Entry
 
 from django.db.models import Q
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-
+from django.core.mail import send_mail
 
 def parse_bibstring(bibstring):
 	parser = BibTexParser()
@@ -123,3 +125,74 @@ def get_query(query_string, search_fields):
         else:
             query = query & or_query
     return query
+
+
+def send_email(db, entry, url):
+	mailtemplate = """$user has added a new paper to the RTS database. It can be viewed at:
+$link
+
+Paper details:
+Title: $title
+Author: $author
+"""
+	if 'abstract' in db.entries[0]:
+		mailtemplate = mailtemplate + "Abstract: " + db.entries[0]['abstract'] + "\n"
+	mailtemplate = mailtemplate + "\n\nBibtex: $bibtex" + "\n"
+
+	mailbody = string.Template(mailtemplate).substitute({
+		'user': get_username(),
+		'link': url,
+		'title': entry.title,
+		'author': entry.author,
+		'bibtex': entry.bib
+	})
+
+	try:
+		pass
+		#send_mail("New paper published", 
+		#	mailbody, 
+		#	'rtsbibtex-no-reply@cs.york.ac.uk', 
+		#	['rts-group@york.ac.uk'],
+		#	fail_silently=False)
+	except:
+		pass
+
+
+
+def get_new_bibkey(request):
+	"""
+	Return an unused bibtex key for the given request, of the format UsernameYear
+	Adds disambiguating letters from 'a' if multiple such keys exist
+	"""
+	#author = request.POST.get('manual_author', 'NoAuthor')
+	author = get_username()
+	year = request.POST.get('manual_year', 'NoYear')
+	key = author + year
+
+	if len(Entry.objects.filter(key=key)) > 0:
+		disamb = 1
+		key = key + chr(96 + disamb) #chr(97) == 'a'
+		while len(Entry.objects.filter(key=key)) > 0: #while that key exists in the db
+			if disamb == 26:
+				#if this code ever triggers, someone has been very productive!
+				disamb = 1
+				key = key[:-1]
+				key = key + 'aa'
+			else:
+				disamb = disamb + 1
+				key = key[:-1]
+				key = key + chr(96 + disamb)
+	return key
+
+def assemble_bib(request):
+	p = request.POST
+	bib = "@" + p['entrytype'] + "{" + get_new_bibkey(request) + ",\n"
+	for postitem, v in p.iteritems():
+		val = str(v).strip()
+		if postitem.startswith("manual_") and val != "":
+			fieldname = postitem[7:]
+			bib = bib + "\t" + fieldname + " = {" + val + "},\n" 
+	bib = bib + "}\n"
+	return bib
+
+

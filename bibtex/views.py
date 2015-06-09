@@ -5,7 +5,6 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django import forms
 from django.conf import settings
-from django.core.mail import send_mail
 
 from bibtex.models import Entry, Docfile
 import bibtex.library as library
@@ -130,86 +129,65 @@ def getsearch(request):
 		return render(request, 'bibtex/searchresults.html', {'results': found_entries})
 
 
-def validate(request):
-	if library.get_username() != "":
-		error = library.validate_bibtex(request.POST['bib'])
-		db = None
-		if not error:
-			#If not editing, check the key is not already used (not strictly required but will assist with export)
-			db = library.parse_bibstring(request.POST['bib'])
-			if not 'edit' in request.POST:
-				if len(Entry.objects.filter(key=db.entries[0]['id'])) > 0:
-					error = "The key " + str(db.entries[0]['id']) + " is already present in the database."
+def addedit(request):
+	if library.get_username() == "":
+		return HttpResponse("Bad request.")
+	if not ((request.POST.get('entryMode', None) == 'raw') or (request.POST.get('entryMode', None) == 'fields')):
+		return HttpResponse("Bad request.")
 
-		if not error:
-			#All ok, add the details
-			if 'edit' in request.POST:
-				#Edit the existing entry
-				entry = get_object_or_404(Entry, pk=request.POST['pk'])
-				if entry.owner == library.get_username():		
-					entry.entered = datetime.utcnow()
-					entry.key = db.entries[0]['id']
-					entry.title = library.strip_braces(db.entries[0]['title'])
-					entry.author = db.entries[0]['author']
-					entry.year = db.entries[0]['year']
-					entry.bib = request.POST['bib']
-					entry.save()
-			else:
-				#Add a new entry
-				entry = Entry.objects.create(
-					owner = library.get_username(),
-					entered = datetime.utcnow(),
-					key = db.entries[0]['id'],
-					title = library.strip_braces(db.entries[0]['title']),
-					author = db.entries[0]['author'],
-					year = db.entries[0]['year'],
-					bib = request.POST['bib'],
-				)
+	#If field input, then assemble the bibstring first
+	if request.POST['entryMode'] == 'fields':
+		assembledbib = library.assemble_bib(request)
+	else:
+		assembledbib = request.POST['bib']
 
-			#Now, do we also have a file to upload?
-			if 'file' in request.FILES:
-				origfilename = request.FILES['file']._name
-				filename = library.write_file(request.FILES['file'], origfilename)
-				if filename != None:
-					doc = Docfile.objects.create(entry = entry, filename = filename)
-				else:
-					return HttpResponse("BADFILE" + str(entry.pk))
+	#Validate (and parse) the bibtex string
+	error = library.validate_bibtex(assembledbib)
+	db = None
+	if not error:
+		#If adding a new item, check the key is not already used
+		db = library.parse_bibstring(assembledbib)
+		if not 'edit' in request.POST:
+			if len(Entry.objects.filter(key=db.entries[0]['id'])) > 0:
+				error = "The key " + str(db.entries[0]['id']) + " is already present in the database."
+	if error:
+		return HttpResponse(error)
 
-			#All OK
+	#All ok, add the details
+	if 'edit' in request.POST:
+		#Edit the existing entry
+		entry = get_object_or_404(Entry, pk=request.POST['pk'])
+		if entry.owner == library.get_username():		
+			entry.entered = datetime.utcnow()
+			entry.key = db.entries[0]['id']
+			entry.title = library.strip_braces(db.entries[0]['title'])
+			entry.author = db.entries[0]['author']
+			entry.year = db.entries[0]['year']
+			entry.bib = assembledbib
+			entry.save()
+	else:
+		#Add a new entry
+		entry = Entry.objects.create(
+			owner = library.get_username(),
+			entered = datetime.utcnow(),
+			key = db.entries[0]['id'],
+			title = library.strip_braces(db.entries[0]['title']),
+			author = db.entries[0]['author'],
+			year = db.entries[0]['year'],
+			bib = assembledbib
+		)
 
-			#Maybe send an email
-			if 'email' in request.POST:
-				mailtemplate = """$user has added a new paper to the RTS database. It can be viewed at:
-$link
-
-Paper details:
-Title: $title
-Author: $author
-"""
-				if 'abstract' in db.entries[0]:
-					mailtemplate = mailtemplate + "Abstract: " + db.entries[0]['abstract'] + "\n"
-				mailtemplate = mailtemplate + "\n\nBibtex: $bibtex" + "\n"
-
-				mailbody = string.Template(mailtemplate).substitute({
-					'user': library.get_username(),
-					'link': request.build_absolute_uri(reverse('bibtex:detail', args=[entry.pk])),
-					'title': entry.title,
-					'author': entry.author,
-					'bibtex': entry.bib
-				})
-
-				try:
-					pass
-					#send_mail("New paper published", 
-					#	mailbody, 
-					#	'rtsbibtex-no-reply@cs.york.ac.uk', 
-					#	['rts-group@york.ac.uk'],
-					#	fail_silently=False)
-				except:
-					pass
-
-			resp = HttpResponse("OK" + str(entry.pk))
-			return resp
+	#Now, do we also have a file to upload?
+	if 'file' in request.FILES:
+		origfilename = request.FILES['file']._name
+		filename = library.write_file(request.FILES['file'], origfilename)
+		if filename != None:
+			doc = Docfile.objects.create(entry = entry, filename = filename)
 		else:
-			resp = HttpResponse(error)
-			return resp
+			return HttpResponse("BADFILE" + str(entry.pk))
+
+	#Maybe send an email
+	if 'email' in request.POST:
+		library.send_email(db, entry, request.build_absolute_uri(reverse('bibtex:detail', args=[entry.pk])))
+
+	return HttpResponse("OK" + str(entry.pk))

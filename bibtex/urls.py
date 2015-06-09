@@ -18,5 +18,5 @@ urlpatterns = patterns('',
 	url(r'^search$', views.search, name='search'),
 	url(r'^getsearch$', views.getsearch, name='getsearch'),
 
-	url(r'^validate$', views.validate, name='validate'),
+	url(r'^addedit$', views.addedit, name='addedit'),
 )

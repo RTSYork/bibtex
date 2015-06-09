@@ -2,9 +2,12 @@
 {% load staticfiles %}
 {% block content %}
 
-<script>
+<script src="{% static 'lib/bibtexentry.js' %}"></script>
 
-function validate(text, responseText, statusText, xhr, $form) {
+<script>
+"use strict";
+
+function handleServerResponse(text, responseText, statusText, xhr, $form) {
 	{% if not entry %}
 	var msgtext = "Paper sucessfully added to the database";
 	{% else %}
@@ -15,27 +18,27 @@ function validate(text, responseText, statusText, xhr, $form) {
 	if(text.startsWith("BADFILE")) {
 		swal({	title: "Warning", 
 				text: "Your bibtex was accepted, but an error occurred trying to upload your file. Try editing your newly-added paper to add the file separately.", 
-				type: "warning", confirmButtonText: "OK" }, 
+				type: "warning"}, 
 				function() { window.location = "{% url 'bibtex:index' %}"; }
 			);
 	} else if(text.startsWith("OK")) {
 		swal({	title: "Success", 
 				text: msgtext, 
-				type: "success", confirmButtonText: "OK" }, 
+				type: "success"}, 
 				function() { window.location = "{% url 'bibtex:index' %}"; }
 			);
-	} else swal({title: "Error!", text: text, type: "error", confirmButtonText: "OK" });
+	} else swalError(text);
 }
 
-function filevalidate(text, responseText, statusText, xhr, $form) {
+function handleServerResponseAddFile(text, responseText, statusText, xhr, $form) {
 	reenableSubmitButtons();
 	if(text.startsWith("OK")) {
 		swal({	title: "Success", 
 				text: "File uploaded.", 
-				type: "success", confirmButtonText: "OK" }, 
+				type: "success"}, 
 				function() { window.location = "{% url 'bibtex:index' %}"; }
 			);
-	} else swal({title: "Error!", text: text, type: "error", confirmButtonText: "OK" });
+	} else swalError(text);
 }
 
 function deleteResponse(data) {
@@ -47,43 +50,84 @@ function deleteResponse(data) {
 			window.location = "{% url 'bibtex:index' %}";
 		{% endif %}
 	} else {
-		swal({title: "Error!", text: data, type: "error", confirmButtonText: "OK" });		
+		swalError(text);		
 	}
 }
 
-function checkfiles(data, jqForm, options) {
-	reenableSubmitButtons();
+function validateAddFile(data, jqForm, options) {
 	for(var i = 0; i < data.length; i++) {
 		if(data[i].name == "file" && data[i].value == "") {
-			swal({title: "Error!", text: "Please select a file to upload.", type: "error", confirmButtonText: "OK" });
+			swalError("Please select a file to upload.");
+			reenableSubmitButtons();
 			return false;
 		}
 	}
 	return true;
 }
 
+
+function validate(data, jqForm, options) {
+	function checkNotEmpty(name) {
+		if($('input[name=manual_' + name + ']').val() == "") {
+			swalError("Field '" + name + "' must not be empty.");
+			reenableSubmitButtons();
+			return false;
+		} 
+		return true;
+	}
+
+	if($("input#entryMode").val() == "raw") {
+		if($('textarea#rawbibtexentry').val() == "") {
+			swalError("Please enter a bibtex entry.");
+			reenableSubmitButtons();
+			return false;
+		}
+	} else {
+		if($('input[name=entrytype]:radio:checked').length == 0) {
+			swalError("Please select an entry type.");
+			reenableSubmitButtons();
+			return false;
+		}
+		return checkNotEmpty('title') && checkNotEmpty('author') && checkNotEmpty('year');
+	}
+}
+
+
 $(function() {
-	$("#bibtexaddform").ajaxForm({success: validate});
-	$("#fileaddform").ajaxForm({beforeSubmit: checkfiles, success: filevalidate});
+	$("#rawbibtexlink").click(function() {
+		$("#basicadd").hide();
+		$("#advancedadd").show();
+		$("input#entryMode").val("raw");
+	});
+
+	$("#addwithfieldslink").click(function() {
+		$("#basicadd").show();
+		$("#advancedadd").hide();
+		$("input#entryMode").val("fields")
+	});
+
+	$("#bibtexaddform").ajaxForm({beforeSubmit: validate, success: handleServerResponse});
+	$("#fileaddform").ajaxForm({beforeSubmit: validateAddFile, success: handleServerResponseAddFile});
+
+	$('input[name="entrytype"]').each(function(index) {
+		$(this).click(function() {
+			bibtexInputTypeClick(this);
+		});
+	});
 
 	$(".deletefile").each(function(index) {
 		$(this).click(function() {
 			var delurl = $(this).data("id");
-			swal({
-				title: "Confirm delete",
-				text: "Are you sure you want to delete this file?",
-				type: "warning",
-				showCancelButton: true,
-				confirmButtonColor: "#FF5B55",
-				confirmButtonText: "Delete"}, function() {
-					$.ajax({
-						type: "POST",
-						url: delurl,
-						data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
-						success: deleteResponse
-					})
+
+			swalWarn("Confirm delete", "Are you sure you want to delete this file?", "Delete", function(){
+				$.ajax({
+					type: "POST",
+					url: delurl,
+					data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
+					success: deleteResponse
 				});
-		})
+			});
+		});
 	});
 	
 	$(".submit").each(function(index) {
@@ -98,26 +142,83 @@ $(function() {
 {% if username %}
 
 {% if not entry %}
-<h1>Add an entry to the database</h1>
-
-<p>You are adding as the user <span class="username">{{username}}</span>. In order to edit this entry in the future you will have to use the same user account. If this is incorrect, please log out and log in as a different user.</p>
+	<h1>Add an entry to the database</h1>
+	<p>You are adding as the user <span class="username">{{username}}</span>. In order to edit this entry in the future you will have to use the same user account. If this is incorrect, please log out and log in as a different user.</p>
 {% else %}
-<h1>Edit an entry</h1>
+	<h1>Edit an entry</h1>
 {% endif %}
 
 <div class="editbox">
-<p class="notopmargin">Please ensure that your Bibtex has <tt>title</tt>, <tt>author</tt> and <tt>year</tt> fields, and you should include an <tt>abstract</tt> field if possible.</p>
 
-<form action="{%url 'bibtex:validate' %}" method="post" id="bibtexaddform" enctype="multipart/form-data">
+<form action="{%url 'bibtex:addedit' %}" method="post" id="bibtexaddform" enctype="multipart/form-data">
 	{% csrf_token %}
 	{% if entry %}
-	<input type="hidden" name="pk" value={{entry.pk}}>
-	<input type="hidden" name="edit" value="edit">
+		<input type="hidden" name="pk" value={{entry.pk}}>
+		<input type="hidden" name="edit" value="edit">
+		<input type="hidden" name="entryMode" id="entryMode" value="raw">
+	{% else %}
+		<input type="hidden" name="entryMode" id="entryMode" value="fields">
 	{% endif %}
-	<div>
-		<div><label for="bibtex">Raw bibtex input:</label></div>
-		<textarea cols="60" rows="15" name="bib">{{entry.bib}}</textarea>
-	</div><p></p>
+
+	{% if not entry %}
+		<div id="basicadd">
+			<p class="notopmargin">Enter the details of the new entry below. When entering multiple authors, please use proper Bibtex formatting. i.e. <tt>Neil C. Audsley and Leandro Soares Indrusiak and Alan Burns</tt>.</p>
+			<p>Required fields are <b>bold</b>, optional fields <span class="bibtex_optional">are italics</span>.</p>
+			<p><a href="#" id="rawbibtexlink">Or add the raw Bibtex entry manually</a></p>
+
+			<label>Entry type: </label>
+			
+			<table width="100%" cellpadding="2">
+			<tr>
+				<td><input type="radio" name="entrytype" value="article">Article</td>
+				<td><input type="radio" name="entrytype" value="book">Book</td>
+				<td><input type="radio" name="entrytype" value="inproceedings">Inproceedings</td>
+				<td><input type="radio" name="entrytype" value="incollection">Incollection</td>
+			</tr>
+			<tr>
+				<td><input type="radio" name="entrytype" value="misc">Misc</td>
+				<td><input type="radio" name="entrytype" value="phdthesis">Phdthesis</td>
+				<td><input type="radio" name="entrytype" value="techreport">Techreport</td>
+			</tr>
+			</table>
+			<p></p>
+			<table cellpadding="2">
+			<tr><td><label>Title: </label></td><td><input type="text" name="manual_title" value="" size=80></td></tr>
+			<tr><td><label>Author(s): </label></td><td><input type="text" name="manual_author" value="" size=80></td></tr>
+			<tr><td><label>Year: </label></td><td><input type="text" name="manual_year" value="" size=20></td></tr>
+
+			<tr id="tr_journal" class="initiallyHidden"><td><label>Journal: </label></td><td><input type="text" name="manual_journal" value="" size=80></td></tr>
+			<tr id="tr_publisher" class="initiallyHidden"><td><label>Publisher: </label></td><td><input type="text" name="manual_publisher" value="" size=80></td></tr>
+			<tr id="tr_booktitle" class="initiallyHidden"><td><label>Booktitle: </label></td><td><input type="text" name="manual_booktitle" value="" size=80></td></tr>
+			<tr id="tr_volume" class="initiallyHidden"><td><label>Volume: </label></td><td><input type="text" name="manual_volume" value="" size=20></td></tr>
+			<tr id="tr_number" class="initiallyHidden"><td><label>Number: </label></td><td><input type="text" name="manual_number" value="" size=20></td></tr>
+			<tr id="tr_pages" class="initiallyHidden"><td><label>Pages: </label></td><td><input type="text" name="manual_pages" value="" size=20></td></tr>
+			<tr id="tr_series" class="initiallyHidden"><td><label>Series: </label></td><td><input type="text" name="manual_series" value="" size=80></td></tr>
+			<tr id="tr_edition" class="initiallyHidden"><td><label>Edition: </label></td><td><input type="text" name="manual_edition" value="" size=80></td></tr>
+			<tr id="tr_month" class="initiallyHidden"><td><label>Month: </label></td><td><input type="text" name="manual_month" value="" size=20></td></tr>
+			<tr id="tr_editor" class="initiallyHidden"><td><label>Editor: </label></td><td><input type="text" name="manual_editor" value="" size=80></td></tr>
+			<tr id="tr_school" class="initiallyHidden"><td><label>School: </label></td><td><input type="text" name="manual_school" value="" size=80></td></tr>
+			<tr id="tr_institution" class="initiallyHidden"><td><label>Institution: </label></td><td><input type="text" name="manual_institution" value="" size=80></td></tr>
+			<tr id="tr_howpublished" class="initiallyHidden"><td><label>Howpublished: </label></td><td><input type="text" name="manual_howpublished" value="" size=80></td></tr>
+			</table>
+			<p></p>
+			<label>Abstract: </label><textarea cols="60" rows="6" name="manual_abstract"></textarea>
+			</ul><p></p>
+		</div>
+	{% endif %}
+
+	<div id="advancedadd" {% if not entry %} class="initiallyHidden" {% endif %}>
+		<p class="notopmargin">Please ensure that your Bibtex has <tt>title</tt>, <tt>author</tt> and <tt>year</tt> fields, and you should include an <tt>abstract</tt> field if possible.</p>
+
+		{% if not entry %}
+			<p><a href="#" id="addwithfieldslink">Or add by entering fields individually</a></p>
+		{% endif %}
+
+		<div>
+			<div><label for="bibtex">Raw bibtex input:</label></div>
+			<textarea cols="60" rows="15" name="bib" id="rawbibtexentry">{{entry.bib}}</textarea>
+		</div><p></p>
+	</div>
 
 	<div>
 	{% if entry %}

@@ -112,6 +112,17 @@ label {
 }
 .submitdisabled:hover {background-color: #78655B;}
 
+.initiallyHidden { 
+	display: none; 
+}
+
+.bibtex_required {}
+
+.bibtex_optional {
+	font-weight: normal;
+	font-style: italic;
+	color: #777777;
+}
 
 .editbox {
 	background-color: #eeeeee;

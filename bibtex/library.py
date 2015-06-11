@@ -135,17 +135,16 @@ Paper details:
 Title: $title
 Author: $author
 """
-	if 'abstract' in db.entries[0]:
-		mailtemplate = mailtemplate + "Abstract: " + db.entries[0]['abstract'] + "\n"
-	mailtemplate = mailtemplate + "\n\nBibtex: $bibtex" + "\n"
-
 	mailbody = string.Template(mailtemplate).substitute({
 		'user': get_username(),
 		'link': url,
 		'title': entry.title,
-		'author': entry.author,
-		'bibtex': entry.bib
+		'author': entry.author
 	})
+
+	if 'abstract' in db.entries[0]:
+		mailbody = mailbody + "Abstract: " + db.entries[0]['abstract'] + "\n"
+	mailbody = mailbody + "\n\nBibtex: " + entry.bib + "\n"
 
 	try:
 		pass

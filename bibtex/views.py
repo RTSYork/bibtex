@@ -182,7 +182,7 @@ def addedit(request):
 		entry = get_object_or_404(Entry, pk=request.POST['pk'])
 		if entry.owner == library.get_username():		
 			entry.entered = datetime.utcnow()
-			entry.key = db.entries[0]['id']
+			#entry.key = db.entries[0]['id'] #Editing should not change the key
 			entry.title = library.strip_braces(db.entries[0]['title'])
 			entry.author = db.entries[0]['author']
 			entry.year = db.entries[0]['year']

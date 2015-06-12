@@ -2,7 +2,7 @@ import bibtexparser
 from bibtexparser.bparser import BibTexParser
 import re, sys, logging, os, string
 
-from bibtex.models import Entry
+from bibtex.models import Entry, Docfile
 
 from django.db.models import Q
 from django.conf import settings
@@ -193,5 +193,28 @@ def assemble_bib(request):
 			bib = bib + "\t" + fieldname + " = {" + val + "},\n" 
 	bib = bib + "}\n"
 	return bib
+
+
+def make_json_serialisable(found_entries):
+	out = {}
+	for e in found_entries:
+		item = {}
+		item['owner'] = e.owner
+		item['title'] = e.title
+		item['year'] = e.year
+		item['author'] = e.author 
+		item['abstract'] = get_entry_bibtex_data(e.bib, 'abstract')
+		item['bib'] = e.bib
+		item['id'] = e.id
+		item['lastedited'] = str(e.entered)
+
+		files = []
+		for f in e.docfile_set.all():
+			files.append(f.filename)
+
+		item['files'] = files
+		out[e.key] = item
+
+	return out
 
 

@@ -1,10 +1,12 @@
 from django.conf.urls import patterns, url
+from django.views.generic import TemplateView
 
 from bibtex import views
 
 urlpatterns = patterns('',
 	url(r'^$', views.index, name='index'),
 	url(r'^detail/(?P<epk>\d+)/$', views.detail, name='detail'),
+	url(r'^api/$', TemplateView.as_view(template_name="bibtex/api.html")),
 
 	url(r'^add$', views.add, name='add'),
 	url(r'^edit/(?P<epk>\d+)/$', views.edit, name='edit'),

@@ -8,7 +8,7 @@ from django.conf import settings
 
 from bibtex.models import Entry, Docfile
 import bibtex.library as library
-import string
+import string, json
 
 
 def index(request):
@@ -112,23 +112,36 @@ def getsearch(request):
 	else: 
 		query_string = vars['term'].strip()
 
-	search_fields = []
-	if 'search_title' in vars: search_fields.append('title')
-	if 'search_author' in vars: search_fields.append('author')
-	if 'search_all' in vars: search_fields.append('bib')
-	entry_query = library.get_query(query_string, search_fields)
-	if entry_query:
-		found_entries = Entry.objects.filter(entry_query).order_by('-entered')
-	else:
-		found_entries = Entry.objects.order_by("-entered")
 
-	if 'fromyear' in vars: found_entries = found_entries.filter(year__gte=int(vars['fromyear']))
-	if 'toyear' in vars: found_entries = found_entries.filter(year__lte=int(vars['toyear']))
+	if 'search_bibkey' in vars:
+		found_entries = Entry.objects.filter(key=query_string)
+	elif 'search_dbkey' in vars:
+		try:
+			keyid = int(query_string)
+			found_entries = Entry.objects.filter(pk=keyid)
+		except:
+			found_entries = []
+	else:
+		search_fields = []
+		if 'search_title' in vars: search_fields.append('title')
+		if 'search_author' in vars: search_fields.append('author')
+		if 'search_all' in vars: search_fields.append('bib')
+		entry_query = library.get_query(query_string, search_fields)
+		if entry_query:
+			found_entries = Entry.objects.filter(entry_query).order_by('-entered')
+		else:
+			found_entries = Entry.objects.order_by("-entered")
+
+		if 'fromyear' in vars: found_entries = found_entries.filter(year__gte=int(vars['fromyear']))
+		if 'toyear' in vars: found_entries = found_entries.filter(year__lte=int(vars['toyear']))
 
 	if not 'output' in vars:
 		return render(request, 'bibtex/searchresults.html', {'results': found_entries})
 	else:
-		return render(request, 'bibtex/searchresults_plain.html', {'results': found_entries, 'output': vars['output']})
+		if vars['output'] == 'json':
+			return HttpResponse(json.dumps(library.make_json_serialisable(found_entries)))
+		else:
+			return render(request, 'bibtex/searchresults_plain.html', {'results': found_entries, 'output': vars['output']})
 
 
 def searchkey(request):

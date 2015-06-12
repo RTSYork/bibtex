@@ -1,0 +1,72 @@
+{% extends 'bibtex/base.html' %}
+{% block content %}
+
+{# Main details #}
+<h1>API details</h1>
+
+<p>The Bibtex database provides a simple search API for if you want to embed publication lists into other websites. Searching is performed by sending a GET or POST request to: <tt>{%url 'bibtex:getsearch' %}</tt></p>
+<p>The supported parameters are:</p>
+
+<ul>
+<li><tt>term</tt>: The search term (URL encoded if via GET).</li>
+<li><tt>search_title</tt>: If present then <tt>term</tt> is searched for in the article title.</li>
+<li><tt>search_author</tt>: If present then <tt>term</tt> is searched for in the author name.</li>
+<li><tt>search_all</tt>: If present then <tt>term</tt> is searched for in the entire entry.</li>
+<li><tt>fromyear</tt>: Integer specifying the earliest year to search from.</li>
+<li><tt>toyear</tt>: Integer specifying the last year to search up to.</li>
+<li><tt>search_bibkey</tt>: Fetch the entry with Bibtex key <tt>term</tt>. If specified then all other <tt>search_*</tt> options are ignored.</li>
+<li><tt>search_dbkey</tt>: Fetch the entry with database id <tt>term</tt> (obtained from JSON output, see below). If specified then all other <tt>search_*</tt> options are ignored.</li>
+<li><tt>output</tt>: Set to one of the following to change the output format:</li>
+	<ul>
+		<li><tt>plain</tt>: Plain HTML</li>
+		<li><tt>bibtex</tt>: As a bibtex file</li>
+		<li><tt>json</tt>: As a JSON object</li>
+	</ul>
+</ul>
+
+<p>For example, the following request gets all entries in 2013 as a bibtex file:</p>
+<p><tt>/bibtex/getsearch?fromyear=2013&toyear=2013&output=bibtex</tt></p>
+
+<p>Or to search for all entries from authors named 'Bill'</p>
+<p><tt>/bibtex/getsearch?term=Bill&search_author</tt></p>
+
+<h2>Output Formats</h2>
+
+<h3>Plain</h3>
+<p>This output format is a plain HTML version of the search results. Each result is contained in a &ltp&gt tag of class <tt>paperentry</tt> and surrounded by an &lta&gt tag linking to the entry in the database. The format is simply the paper title (surrounded by a &ltspan&gt of class <tt>papertitle</tt>), the author (surrounded by a &ltspan&gt of class <tt>paperauthor</tt>), and then the publication year.</p>
+
+<h3>Bibtex</h3>
+<p>This output format presents a Bibtex file suitable for use with Latex. Each search result has its own entry in the file.</p>
+
+<h3>JSON</h3>
+<p>This output format presents the search results as a JSON object. For example:</p>
+<pre>
+{
+  "Gray2014a": {
+    "id": 47,
+    "owner": "iang",
+    "author": "I. Gray and N. C. Audsley and D. Kolovos and N. Matragkas and R. Paige and L. S. Indrusiak",
+    "title": "Automatic Development of Embedded Systems Using Model Driven Engineering and Compile-Time Virtualisation, in Embedded and Real Time System Development: A Software Engineering Perspective",
+    "year": 2014,
+    "lastedited": "2015-06-07 16:56:43.965097+00:00",
+    "files": [
+      "gray2014a.pdf"
+    ],
+    "abstract": "",
+    "bib": ""
+  }
+
+  "OtherResult2015a": {
+    ...
+  }
+}
+</pre>
+<p>As the example shows, the object is named the Bibtex key of the entry, and it contains all stored information about the entry. Note that the <tt>abstract</tt> and <tt>bib</tt> entrys are not shown above for clarity.</p>
+
+<h3>Other output formats</h3>
+<p>Other output formats are easy to add. If you have a need, please contact <a href="mailto:ian.gray@york.ac.uk">Ian</a>.</p>
+
+<p><a href="{% url 'bibtex:index' %}">Back</a></p>
+
+{% endblock %}
+

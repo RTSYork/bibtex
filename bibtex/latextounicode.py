@@ -25,7 +25,7 @@ unicode_map = {
 	'.': u'\u0307',
 	'"': u'\u0308',
 	'H': u'\u0308',
-	'd': u'\u0323'
+	'd': u'\u0323',
 }
 
 #For commands which do not correspond to a combining character.
@@ -43,7 +43,8 @@ replace_map = {
 #Latex has commands for 'undotted' i and j. This complication is automatically handled by Unicode
 arg_map = {
 	'\\i': 'i',
-	'\\j': 'j'
+	'\\j': 'j',
+	'\\_': '_',
 }
 
 

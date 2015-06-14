@@ -22,7 +22,6 @@ class Entry(models.Model):
 	def num_attached_files(self):
 		return len(self.docfile_set.all())
 	num_attached_files.short_description = "Files"
-	num_attached_files.boolean = True
 
 	def __str__(self):
 		return self.owner + "_" + self.key

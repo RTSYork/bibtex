@@ -136,12 +136,14 @@ $(function() {
 		});
 	});
 
+	{% if not entry %}
 	$('textarea#rawbibtexentry').keyup(function() {
 		clearTimeout(typingTimer);
 		if ($('textarea#rawbibtexentry').val) {
 			typingTimer = setTimeout(checkBibtexKeyLive, doneTypingInterval);
 		}
 	});
+	{% endif %}
 })
 
 

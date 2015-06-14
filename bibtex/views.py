@@ -33,7 +33,6 @@ def detail(request, epk):
 		'entry': entry, 
 		'docfile_set': entry.docfile_set.all(),
 		'ftpbase': settings.MEDIA_URL,
-		'abstract': library.get_entry_bibtex_data(entry.bib, 'abstract'),
 		'owner': (entry.owner == library.get_username()),
 	})
 
@@ -186,6 +185,7 @@ def addedit(request):
 			#entry.key = db.entries[0]['id'] #Editing should not change the key
 			entry.title = library.sanitise(db.entries[0]['title'])
 			entry.author = library.sanitise(db.entries[0]['author'])
+			entry.abstract = db.entries[0]['abstract']
 			entry.year = db.entries[0]['year']
 			entry.bib = assembledbib
 			entry.save()
@@ -196,7 +196,8 @@ def addedit(request):
 			entered = datetime.utcnow(),
 			key = db.entries[0]['id'],
 			title = library.sanitise(db.entries[0]['title']),
-			author = db.entries[0]['author'],
+			author = library.sanitise(db.entries[0]['author']),
+			abstract = db.entries[0]['abstract'],
 			year = db.entries[0]['year'],
 			bib = assembledbib
 		)

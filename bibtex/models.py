@@ -15,6 +15,7 @@ class Entry(models.Model):
 	title = models.CharField(max_length=200)
 	author = models.CharField(max_length=200)
 	year = models.IntegerField()
+	abstract = models.TextField(default="")
 
 	#The plain text version of the bibtex entry
 	bib = models.TextField()
@@ -22,6 +23,11 @@ class Entry(models.Model):
 	def num_attached_files(self):
 		return len(self.docfile_set.all())
 	num_attached_files.short_description = "Files"
+
+	def has_abstract(self):
+		return self.abstract != ""
+	has_abstract.short_description = "Abstract?"
+	has_abstract.boolean = True
 
 	def __str__(self):
 		return self.owner + "_" + self.key

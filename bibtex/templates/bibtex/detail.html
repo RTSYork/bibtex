@@ -37,10 +37,10 @@ $(function() {
 
 
 {# If there is an Abstract entry in the bibtex of the Entry then print it #}
-{% if abstract %}
+{% ifnotequal entry.abstract "" %}
 <h3>Abstract</h3>
-<p class="notopmargin">{{ abstract }} </p>
-{% endif %}
+<p class="notopmargin">{{ entry.abstract }} </p>
+{% endifnotequal %}
 
 
 {# Add download link(s) if at least one DocEntry exists for this Entry #}

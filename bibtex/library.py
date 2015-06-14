@@ -153,8 +153,8 @@ Author: $author
 		'author': entry.author
 	})
 
-	if 'abstract' in db.entries[0]:
-		mailbody = mailbody + "Abstract: " + db.entries[0]['abstract'] + "\n"
+	if entry.abstract != "":
+		mailbody = mailbody + "Abstract: " + entry.abstract + "\n"
 	mailbody = mailbody + "\n\nBibtex: " + entry.bib + "\n"
 
 	try:
@@ -214,7 +214,7 @@ def make_json_serialisable(found_entries):
 		item['title'] = e.title
 		item['year'] = e.year
 		item['author'] = e.author 
-		item['abstract'] = get_entry_bibtex_data(e.bib, 'abstract')
+		item['abstract'] = e.abstract
 		item['bib'] = e.bib
 		item['id'] = e.id
 		item['lastedited'] = str(e.entered)

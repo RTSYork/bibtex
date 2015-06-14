@@ -8,7 +8,8 @@ class EntryAdmin(admin.ModelAdmin):
 		'author', 
 		'title',
 		'year', 
-		'num_attached_files'
+		'num_attached_files',
+		'has_abstract'
 	)
 
 class DocfileAdmin(admin.ModelAdmin):

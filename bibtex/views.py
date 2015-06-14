@@ -184,8 +184,8 @@ def addedit(request):
 		if entry.owner == library.get_username():		
 			entry.entered = datetime.utcnow()
 			#entry.key = db.entries[0]['id'] #Editing should not change the key
-			entry.title = library.strip_braces(db.entries[0]['title'])
-			entry.author = db.entries[0]['author']
+			entry.title = library.sanitise(db.entries[0]['title'])
+			entry.author = library.sanitise(db.entries[0]['author'])
 			entry.year = db.entries[0]['year']
 			entry.bib = assembledbib
 			entry.save()
@@ -195,7 +195,7 @@ def addedit(request):
 			owner = library.get_username(),
 			entered = datetime.utcnow(),
 			key = db.entries[0]['id'],
-			title = library.strip_braces(db.entries[0]['title']),
+			title = library.sanitise(db.entries[0]['title']),
 			author = db.entries[0]['author'],
 			year = db.entries[0]['year'],
 			bib = assembledbib

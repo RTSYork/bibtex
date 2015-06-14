@@ -3,6 +3,7 @@ from bibtexparser.bparser import BibTexParser
 import re, sys, logging, os, string
 
 from bibtex.models import Entry, Docfile
+import latextounicode
 
 from django.db.models import Q
 from django.conf import settings
@@ -103,6 +104,16 @@ def strip_braces(text):
 	'''
 	return re.compile(r'(?<!\\)\{|(?<!\\)\}', flags=re.UNICODE).sub("", text)
 
+
+def sanitise(text):
+	"""
+	Called when updating or adding to the database to create nice titles and auther 
+	names etc.
+	Strips out { } and converts latex accent commands into their Unicode equivalents
+	"""
+	converted = latextounicode.convert_string(text)
+	stripped = strip_braces(converted)
+	return stripped
 
 
 def get_query(query_string, search_fields):

@@ -249,19 +249,7 @@ def bulkuploadadd(request):
 		if not 'abstract' in bibe:
 			bibe['abstract'] == ""
 
-		#Sort out the key
-		#If it is in the old RTS format of R:Bloggs:2001a then we can use this information
-		#if bibe['id'].startswith("R:"):
-		#	t = bibe['id'][2:]
-		#	if t.find(':') > 0:
-		#		surname = t[:t.find(':')]
-		#		year = t[t.find(':')+1:]
-		#		newkey = library.get_new_bibkey(year, surname)
-		#else:
-		#Else, we can't
-		newkey = library.get_new_bibkey(bibe['year'], bibe['author'])
-
-		bibe['id'] = newkey
+		bibe['id'] = library.get_new_bibkey(bibe['year'], bibe['author'])
 
 		#Dump the raw bibtex for this current entry
 		newdb = bibtexparser.bibdatabase.BibDatabase()

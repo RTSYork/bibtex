@@ -8,7 +8,7 @@ from django.conf import settings
 
 from bibtex.models import Entry, Docfile
 import bibtex.library as library
-import string, json
+import string, json, os
 
 
 def index(request):
@@ -72,7 +72,8 @@ def add_file(request, epk):
 		if not 'file' in request.FILES:
 			return HttpResponse("No file was submitted.")
 
-		origfilename = request.FILES['file']._name
+		_, ext = os.path.splitext(request.FILES['file']._name) 
+		origfilename = entry.key + ext
 		filename = library.write_file(request.FILES['file'], origfilename)
 
 		if filename != None:
@@ -202,7 +203,8 @@ def addedit(request):
 
 	#Now, do we also have a file to upload?
 	if 'file' in request.FILES:
-		origfilename = request.FILES['file']._name
+		_, ext = os.path.splitext(request.FILES['file']._name) 
+		origfilename = entry.key + ext
 		filename = library.write_file(request.FILES['file'], origfilename)
 		if filename != None:
 			doc = Docfile.objects.create(entry = entry, filename = filename)

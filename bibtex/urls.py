@@ -10,6 +10,8 @@ urlpatterns = patterns('',
 
 	url(r'^add$', views.add, name='add'),
 	url(r'^edit/(?P<epk>\d+)/$', views.edit, name='edit'),
+	url(r'^bulkupload$', views.bulkupload, name='bulkupload'),
+	url(r'^bulkuploadadd$', views.bulkuploadadd, name='bulkuploadadd'),
 
 	url(r'^view$', views.view, name='view'),
 	url(r'^delete_confirm/(?P<epk>\d+)/$', views.delete_confirm, name='delete_confirm'),

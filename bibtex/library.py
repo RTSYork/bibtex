@@ -32,25 +32,34 @@ def get_entry_bibtex_data(bibstring, data):
 		return None
 
 
-def validate_bibtex(bibstring):
-	db = parse_bibstring(bibstring)
-	if len(db.entries) != 1: 
-		return "Your bibtex entry did not parse correctly."
-	entry = db.entries[0]
-	
+def check_bibtex_entry(entry):
 	if not 'id' in entry: return "Your Bibtex did not include a key."
 	if not 'title' in entry: return "Your Bibtex did not include a title field."
 	if not 'author' in entry: return "Your Bibtex did not include an author field."
 	if not 'year' in entry: return "Your Bibtex did not include a year field."
-
 	yearstr = entry['year']
 	try:
 		year = int(yearstr)
 	except ValueError:
 		return "Your year field was not a valid year (e.g. 2001, 2014)"
-
 	#No problems
 	return None
+
+
+def validate_bulk_bibtex(bibstring):
+	db = parse_bibstring(bibstring)
+	for entry in db.entries:
+		rv = check_bibtex_entry(entry)
+		if rv != None:
+			return rv
+	return None
+
+def validate_bibtex(bibstring):
+	db = parse_bibstring(bibstring)
+	if len(db.entries) != 1: 
+		return "Your bibtex entry did not parse correctly."
+	entry = db.entries[0]
+	return check_bibtex_entry(entry)
 
 
 def write_file(uploadedfile, origfilename):
@@ -168,16 +177,36 @@ Author: $author
 		pass
 
 
+def author_to_bibkey(s):
+	try:
+		allowed = [':', '-']
+		names = bibtexparser.customization.getnames([i.strip() for i in s.replace('\n', ' ').split(" and ")])
+		if len(names) < 1: 
+			return None
+		co = names[0].find(',')
+		if co > 0:
+			out = ""
+			for c in names[0][:co]:
+				if (c >= 'A' and c <= 'Z') or (c >= 'a' and c <= 'z') or (c >= '0' and c <= '9') or c in allowed:
+					out = out + c
+			if out == "":
+				return None
+			return out
+		else:
+			return None
+	except:
+		return None
 
-def get_new_bibkey(request):
+
+def get_new_bibkey(year, author):
 	"""
-	Return an unused bibtex key for the given request, of the format UsernameYear
+	Return an unused bibtex key of the format UsernameYear
 	Adds disambiguating letters from 'a' if multiple such keys exist
 	"""
-	#author = request.POST.get('manual_author', 'NoAuthor')
-	author = get_username()
-	year = request.POST.get('manual_year', 'NoYear')
-	key = author + year
+	bibauth = author_to_bibkey(author)
+	if bibauth == None:
+		bibauth = get_username()
+	key = bibauth + str(year)
 
 	if len(Entry.objects.filter(key=key)) > 0:
 		disamb = 1
@@ -196,7 +225,7 @@ def get_new_bibkey(request):
 
 def assemble_bib(request):
 	p = request.POST
-	bib = "@" + p['entrytype'] + "{" + get_new_bibkey(request) + ",\n"
+	bib = "@" + p['entrytype'] + "{" + get_new_bibkey(request.POST.get('manual_year', 'NoYear'), request.POST.get('manual_author', None)) + ",\n"
 	for postitem, v in p.iteritems():
 		val = str(v).strip()
 		if postitem.startswith("manual_") and val != "":

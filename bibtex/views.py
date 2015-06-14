@@ -5,10 +5,12 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django import forms
 from django.conf import settings
+from django.core.files.base import ContentFile
 
 from bibtex.models import Entry, Docfile
 import bibtex.library as library
 import string, json, os
+import bibtexparser
 
 
 def index(request):
@@ -176,6 +178,9 @@ def addedit(request):
 	if error:
 		return HttpResponse(error)
 
+	if not 'abstract' in db.entries[0]:
+		db.entries[0]['abstract'] = ""
+
 	#All ok, add the details
 	if 'edit' in request.POST:
 		#Edit the existing entry
@@ -217,3 +222,61 @@ def addedit(request):
 		library.send_email(db, entry, request.build_absolute_uri(reverse('bibtex:detail', args=[entry.pk])))
 
 	return HttpResponse("OK" + str(entry.pk))
+
+
+def bulkupload(request):
+	if library.get_username != "":
+		return render(request, 'bibtex/bulkupload.html', {'username': library.get_username()})
+
+def bulkuploadadd(request):
+	if library.get_username() == "":
+		return HttpResponse("Bad request.")
+	if not 'file' in request.FILES:
+		return HttpResponse("No file was submitted.")
+
+	bibtext = request.FILES['file'].read()
+
+	print bibtext
+
+	error = library.validate_bulk_bibtex(bibtext)
+	if error:
+		return HttpResponse(error)
+	db = library.parse_bibstring(bibtext)
+	if len(db.entries) < 1:
+		return HttpResponse("No entries found in uploaded file.")
+
+	for bibe in db.entries:
+		if not 'abstract' in bibe:
+			bibe['abstract'] == ""
+
+		#Sort out the key
+		#If it is in the old RTS format of R:Bloggs:2001a then we can use this information
+		#if bibe['id'].startswith("R:"):
+		#	t = bibe['id'][2:]
+		#	if t.find(':') > 0:
+		#		surname = t[:t.find(':')]
+		#		year = t[t.find(':')+1:]
+		#		newkey = library.get_new_bibkey(year, surname)
+		#else:
+		#Else, we can't
+		newkey = library.get_new_bibkey(bibe['year'], bibe['author'])
+
+		bibe['id'] = newkey
+
+		#Dump the raw bibtex for this current entry
+		newdb = bibtexparser.bibdatabase.BibDatabase()
+		newdb.entries.append(bibe)
+		rawbib = bibtexparser.dumps(newdb, bibtexparser.bwriter.BibTexWriter())
+
+		entry = Entry.objects.create(
+			owner = library.get_username(),
+			entered = datetime.utcnow(),
+			key = newkey,
+			title = library.sanitise(bibe['title']),
+			author = library.sanitise(bibe['author']),
+			abstract = bibe['abstract'],
+			year = bibe['year'],
+			bib = rawbib
+		)
+
+	return HttpResponse("OK")

@@ -1,0 +1,58 @@
+{% extends 'bibtex/base.html' %}
+{% block content %}
+
+<script>
+"use strict";
+
+function goBack() { window.location = "{% url 'bibtex:index' %}"; }
+
+function validateAddFile(data, jqForm, options) {
+	for(var i = 0; i < data.length; i++) {
+		if(data[i].name == "file" && data[i].value == "") {
+			swalError("Please select a file to upload.");
+			reenableSubmitButtons();
+			return false;
+		}
+	}
+	return true;
+}
+
+function handleServerResponseAddFile(text, responseText, statusText, xhr, $form) {
+	reenableSubmitButtons();
+	if(text.startsWith("OK")) {
+		swal({title: "Upload Complete", text: "Upload complete. Server responded:\n" + text.slice(2), type: "success"}, goBack);
+	} else swalError(text);
+}
+
+$(function() {
+	$("#uploadform").ajaxForm({beforeSubmit: validateAddFile, success: handleServerResponseAddFile});
+	$(".submit").each(function(index) {
+		$(this).click(function() {
+			$(this).addClass("submitdisabled");
+		});
+	});
+});
+
+</script>
+
+{% if username %}
+
+<h1>Bulk Upload</h1>
+
+<p>If you have found your way here, whilst normal users <i>are</i> allowed to perform bulk uploads, but should be very confident that your Bibtex file is well-formed, as rectifying mistakes can take a lot of clicking!</p>
+<p>Note that to avoid conflicts, new Bibtex keys will be selected for your entries.</p>
+
+<form action="{%url 'bibtex:bulkuploadadd' %}" method="post" id="uploadform" enctype="multipart/form-data">
+	{% csrf_token %}
+	<div><label for="file">Upload Bibtex file</label></div>
+	<input type="file" name="file">
+	<div class="centre">
+		<input type="submit" class="submit" value="Submit">
+	</div>
+</form>
+
+<p><a href="{% url 'bibtex:index' %}">Back</a></p>
+
+{% endif %}
+{% endblock %}
+

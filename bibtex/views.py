@@ -6,6 +6,7 @@ from django.views import generic
 from django import forms
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 from bibtex.models import Entry, Docfile
 import bibtex.library as library
@@ -246,6 +247,7 @@ def bulkuploadadd(request):
 	for bibe in db.entries:
 		if not 'abstract' in bibe:
 			bibe['abstract'] == ""
+		origkey = bibe['id']
 		bibe['id'] = library.get_new_bibkey(bibe['year'], bibe['author'])
 		newdb = bibtexparser.bibdatabase.BibDatabase()
 		newdb.entries.append(bibe)
@@ -254,11 +256,18 @@ def bulkuploadadd(request):
 		entry = Entry.objects.create(
 			owner = library.get_username(),
 			entered = datetime.utcnow(),
-			key = newkey,
+			key = bibe['id'],
 			title = library.sanitise(bibe['title']),
 			author = library.sanitise(bibe['author']),
 			abstract = bibe['abstract'],
 			year = bibe['year'],
 			bib = rawbib
 		)
+
+		#Now is there a file already in the FTP directory for this? (Used by the migration from the original database)
+		for f in os.listdir(settings.MEDIA_ROOT):
+			path = os.path.join(settings.MEDIA_ROOT,f)
+			if os.path.isfile(path) and f.startswith(origkey):
+				Docfile.objects.create(entry = entry, filename = f)
+
 	return HttpResponse("OK")

@@ -168,18 +168,19 @@ def addedit(request):
 
 	#Validate (and parse) the bibtex string
 	error = library.validate_bibtex(assembledbib)
-	db = None
-	if not error:
-		#If adding a new item, check the key is not already used
-		db = library.parse_bibstring(assembledbib)
-		if not 'edit' in request.POST:
-			if len(Entry.objects.filter(key=db.entries[0]['id'])) > 0:
-				error = "The key " + str(db.entries[0]['id']) + " is already present in the database."
 	if error:
 		return HttpResponse(error)
 
+	db = library.parse_bibstring(assembledbib)
+
 	if not 'abstract' in db.entries[0]:
 		db.entries[0]['abstract'] = ""
+
+	#Update the key based on the author and year, and update the bibtex
+	db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], db.entries[0]['id'])
+	newdb = bibtexparser.bibdatabase.BibDatabase()
+	newdb.entries.append(db.entries[0])
+	assembledbib = bibtexparser.dumps(newdb, bibtexparser.bwriter.BibTexWriter())
 
 	#All ok, add the details
 	if 'edit' in request.POST:
@@ -187,7 +188,7 @@ def addedit(request):
 		entry = get_object_or_404(Entry, pk=request.POST['pk'])
 		if entry.owner == library.get_username():		
 			entry.entered = datetime.utcnow()
-			#entry.key = db.entries[0]['id'] #Editing should not change the key
+			entry.key = db.entries[0]['id']
 			entry.title = library.sanitise(db.entries[0]['title'])
 			entry.author = library.sanitise(db.entries[0]['author'])
 			entry.abstract = db.entries[0]['abstract']
@@ -235,9 +236,6 @@ def bulkuploadadd(request):
 		return HttpResponse("No file was submitted.")
 
 	bibtext = request.FILES['file'].read()
-
-	print bibtext
-
 	error = library.validate_bulk_bibtex(bibtext)
 	if error:
 		return HttpResponse(error)
@@ -248,10 +246,7 @@ def bulkuploadadd(request):
 	for bibe in db.entries:
 		if not 'abstract' in bibe:
 			bibe['abstract'] == ""
-
 		bibe['id'] = library.get_new_bibkey(bibe['year'], bibe['author'])
-
-		#Dump the raw bibtex for this current entry
 		newdb = bibtexparser.bibdatabase.BibDatabase()
 		newdb.entries.append(bibe)
 		rawbib = bibtexparser.dumps(newdb, bibtexparser.bwriter.BibTexWriter())
@@ -266,5 +261,4 @@ def bulkuploadadd(request):
 			year = bibe['year'],
 			bib = rawbib
 		)
-
 	return HttpResponse("OK")

@@ -198,29 +198,31 @@ def author_to_bibkey(s):
 		return None
 
 
-def get_new_bibkey(year, author):
+def get_new_bibkey(year, author, existingkey=None):
 	"""
-	Return an unused bibtex key of the format UsernameYear
+	Return an unused bibtex key of the format SurnameYear
 	Adds disambiguating letters from 'a' if multiple such keys exist
+	If existingkey is not None, then we won't check for conflicts against existingkey
 	"""
 	bibauth = author_to_bibkey(author)
 	if bibauth == None:
 		bibauth = get_username()
 	key = bibauth + str(year)
-
-	if len(Entry.objects.filter(key=key)) > 0:
-		disamb = 1
-		key = key + chr(96 + disamb) #chr(97) == 'a'
-		while len(Entry.objects.filter(key=key)) > 0: #while that key exists in the db
-			if disamb == 26:
-				#if this code ever triggers, someone has been very productive!
-				disamb = 1
-				key = key[:-1]
-				key = key + 'aa'
-			else:
-				disamb = disamb + 1
-				key = key[:-1]
-				key = key + chr(96 + disamb)
+	
+	if key != existingkey:
+		if len(Entry.objects.filter(key=key)) > 0:
+			disamb = 1
+			key = key + chr(96 + disamb) #chr(97) == 'a'
+			while len(Entry.objects.filter(key=key)) > 0: #while that key exists in the db
+				if disamb == 26:
+					#if this code ever triggers, someone has been very productive!
+					disamb = 1
+					key = key[:-1]
+					key = key + 'aa'
+				else:
+					disamb = disamb + 1
+					key = key[:-1]
+					key = key + chr(96 + disamb)
 	return key
 
 def assemble_bib(request):

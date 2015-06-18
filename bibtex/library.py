@@ -148,7 +148,7 @@ def get_query(query_string, search_fields):
 
 
 def send_email(db, entry, url):
-	mailtemplate = """$user has added a new paper to the RTS database. It can be viewed at:
+	mailtemplate = """$user has added a new paper to the RTS Bibtex database. It can be viewed at:
 $link
 
 Paper details:

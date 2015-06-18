@@ -12,12 +12,13 @@ from bibtex.models import Entry, Docfile
 import bibtex.library as library
 import string, json, os
 import bibtexparser
-
+import bibsettings
 
 def index(request):
 	return render(request, 'bibtex/index.html', {
 			'username': library.get_username(),
 			'recent': Entry.objects.order_by('-entered')[:5],
+			'maintainer': bibsettings.maintainer
 		}
 	)
 
@@ -28,6 +29,9 @@ def view(request):
 			'entries': Entry.objects.filter(owner=library.get_username()).order_by('-entered'),
 		}
 	)
+
+def api(request):
+	return render(request, 'bibtex/api.html', {'maintainer': bibsettings.maintainer})
 
 
 def detail(request, epk):

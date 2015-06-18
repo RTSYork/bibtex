@@ -249,6 +249,15 @@ def bulkuploadadd(request):
 			bibe['abstract'] == ""
 		origkey = bibe['id']
 		bibe['id'] = library.get_new_bibkey(bibe['year'], bibe['author'])
+
+		#Some fields are not supposed to appear in the raw bibtex
+		datafields = ['rtsimgurl', 'rtshtml']
+		dfs = {}
+		for f in datafields:
+			dfs[f] = bibe.get(f, "")
+			if f in bibe: 
+				del bibe[f]
+
 		newdb = bibtexparser.bibdatabase.BibDatabase()
 		newdb.entries.append(bibe)
 		rawbib = bibtexparser.dumps(newdb, bibtexparser.bwriter.BibTexWriter())
@@ -261,6 +270,8 @@ def bulkuploadadd(request):
 			author = library.sanitise(bibe['author']),
 			abstract = bibe['abstract'],
 			year = bibe['year'],
+			imgurl = dfs['rtsimgurl'],
+			html = dfs['rtshtml'],
 			bib = rawbib
 		)
 

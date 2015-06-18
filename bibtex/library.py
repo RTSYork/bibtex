@@ -250,6 +250,11 @@ def make_json_serialisable(found_entries):
 		item['id'] = e.id
 		item['lastedited'] = str(e.entered)
 
+		if e.imgurl != "":
+			item['imgurl'] = e.imgurl
+		if e.html != "":
+			item['html'] = e.html
+
 		files = []
 		for f in e.docfile_set.all():
 			files.append(f.filename)

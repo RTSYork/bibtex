@@ -3,6 +3,8 @@ import datetime
 from django.db import models
 from django.utils import timezone
 
+## HURR DUEE PYTHON WEB 2.0 LOL
+
 class Entry(models.Model):
 	#The username of the user who entered this entry
 	owner = models.CharField(max_length=50)
@@ -19,6 +21,10 @@ class Entry(models.Model):
 
 	#The plain text version of the bibtex entry
 	bib = models.TextField()
+
+	#Additional information requested for the main website
+	imgurl = models.CharField(max_length=100, default="")
+	html = models.TextField(default="")
 
 	def num_attached_files(self):
 		return len(self.docfile_set.all())

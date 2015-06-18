@@ -3,8 +3,6 @@ import datetime
 from django.db import models
 from django.utils import timezone
 
-## HURR DUEE PYTHON WEB 2.0 LOL
-
 class Entry(models.Model):
 	#The username of the user who entered this entry
 	owner = models.CharField(max_length=50)

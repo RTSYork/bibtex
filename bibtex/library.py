@@ -54,6 +54,15 @@ def validate_bulk_bibtex(bibstring):
 			return rv
 	return None
 
+def validate_bibtex_file(filename):
+	with open(filename) as bibtex_file:
+		bibtex_database = bibtexparser.load(bibtex_file)
+		for e in bibtex_database.entries:
+			error = check_bibtex_entry(e)
+			if error != None:
+				print "Error in entry " + str(e['id']) + ": " + str(error)
+
+
 def validate_bibtex(bibstring):
 	db = parse_bibstring(bibstring)
 	if len(db.entries) != 1: 

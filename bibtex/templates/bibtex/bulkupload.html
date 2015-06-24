@@ -39,7 +39,7 @@ $(function() {
 
 <h1>Bulk Upload</h1>
 
-<p>If you have found your way here, whilst normal users <i>are</i> allowed to perform bulk uploads, but should be very confident that your Bibtex file is well-formed, as rectifying mistakes can take a lot of clicking!</p>
+<p>Normal users <i>are</i> allowed to perform bulk uploads, but you should be very confident that your Bibtex file is well-formed as rectifying mistakes can take a lot of clicking! If you are in any doubt, contact <a href="mailto:{{maintainer.email}}">{{maintainer.name}}</a>.</p> 
 <p>Note that to avoid conflicts, new Bibtex keys will be selected for your entries.</p>
 
 <form action="{%url 'bibtex:bulkuploadadd' %}" method="post" id="uploadform" enctype="multipart/form-data">

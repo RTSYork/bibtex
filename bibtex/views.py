@@ -232,7 +232,10 @@ def addedit(request):
 
 def bulkupload(request):
 	if library.get_username != "":
-		return render(request, 'bibtex/bulkupload.html', {'username': library.get_username()})
+		return render(request, 'bibtex/bulkupload.html', {
+			'username': library.get_username(),
+			'maintainer': bibsettings.maintainer
+		})
 
 def bulkuploadadd(request):
 	if library.get_username() == "":
@@ -250,7 +253,7 @@ def bulkuploadadd(request):
 
 	for bibe in db.entries:
 		if not 'abstract' in bibe:
-			bibe['abstract'] == ""
+			bibe['abstract'] = ""
 		origkey = bibe['id']
 		bibe['id'] = library.get_new_bibkey(bibe['year'], bibe['author'])
 

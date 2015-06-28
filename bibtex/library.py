@@ -286,6 +286,14 @@ def assemble_bib(request):
 
 
 def make_json_serialisable(found_entries):
+	"""
+	Used by the getsearch view to create a JSON output.
+
+	Given a list of search results (Entry objects), creates a dictionary 
+	that will be formatted to JSON
+	"""
+	optionals = ['imgurl', 'html', 'downloadurl']
+
 	out = {}
 	for e in found_entries:
 		item = {}
@@ -298,10 +306,9 @@ def make_json_serialisable(found_entries):
 		item['id'] = e.id
 		item['lastedited'] = str(e.entered)
 
-		if e.imgurl != "":
-			item['imgurl'] = e.imgurl
-		if e.html != "":
-			item['html'] = e.html
+		for o in optionals:
+			if getattr(e, o) != "":
+				item[o] = getattr(e, o)
 
 		files = []
 		for f in e.docfile_set.all():

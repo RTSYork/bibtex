@@ -276,9 +276,17 @@ def bulkuploadadd(request):
 		wr = bibtexparser.bwriter.BibTexWriter()
 		rawbib = wr.write(newdb).encode('utf-8')
 
+		if 'uploaded_time' in bibe:
+			try:
+				etime = datetime.strptime(bibe['uploaded_time'], "%Y-%m-%d %H:%M:%S") 
+			except:
+				etime = datetime.utcnow()
+		else:
+			etime = datetime.utcnow()
+
 		entry = Entry.objects.create(
 			owner = library.get_username(),
-			entered = datetime.utcnow(),
+			entered = etime,
 			key = bibe['id'],
 			title = library.sanitise(bibe['title']),
 			author = library.sanitise(bibe['author']),

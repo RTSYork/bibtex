@@ -185,7 +185,9 @@ def addedit(request):
 	db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], db.entries[0]['id'])
 	newdb = bibtexparser.bibdatabase.BibDatabase()
 	newdb.entries.append(db.entries[0])
-	assembledbib = bibtexparser.dumps(newdb, bibtexparser.bwriter.BibTexWriter())
+
+	wr = bibtexparser.bwriter.BibTexWriter()
+	assembledbib = wr.write(newdb).encode('utf-8')
 
 	#All ok, add the details
 	if 'edit' in request.POST:
@@ -258,16 +260,21 @@ def bulkuploadadd(request):
 		bibe['id'] = library.get_new_bibkey(bibe['year'], bibe['author'])
 
 		#Some fields are not supposed to appear in the raw bibtex
-		datafields = ['rtsimgurl', 'rtshtml']
+		datafields = ['image_url', 'abstract_html', 'download_url']
 		dfs = {}
 		for f in datafields:
 			dfs[f] = bibe.get(f, "")
 			if f in bibe: 
 				del bibe[f]
 
+		if dfs['download_url'] == "nil":
+			dfs['download_url'] = ""
+
 		newdb = bibtexparser.bibdatabase.BibDatabase()
 		newdb.entries.append(bibe)
-		rawbib = bibtexparser.dumps(newdb, bibtexparser.bwriter.BibTexWriter())
+
+		wr = bibtexparser.bwriter.BibTexWriter()
+		rawbib = wr.write(newdb).encode('utf-8')
 
 		entry = Entry.objects.create(
 			owner = library.get_username(),
@@ -277,8 +284,9 @@ def bulkuploadadd(request):
 			author = library.sanitise(bibe['author']),
 			abstract = bibe['abstract'],
 			year = bibe['year'],
-			imgurl = dfs['rtsimgurl'],
-			html = dfs['rtshtml'],
+			imgurl = dfs['image_url'],
+			html = dfs['abstract_html'],
+			downloadurl = dfs['download_url'],
 			bib = rawbib
 		)
 

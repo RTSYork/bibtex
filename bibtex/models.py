@@ -23,6 +23,7 @@ class Entry(models.Model):
 	#Additional information requested for the main website
 	imgurl = models.CharField(max_length=100, default="")
 	html = models.TextField(default="")
+	downloadurl = models.CharField(max_length=200, default="")
 
 	def num_attached_files(self):
 		return len(self.docfile_set.all())

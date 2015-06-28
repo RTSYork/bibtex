@@ -32,18 +32,57 @@ def get_entry_bibtex_data(bibstring, data):
 		return None
 
 
-def check_bibtex_entry(entry):
-	if not 'id' in entry: return "Your Bibtex did not include a key."
-	if not 'title' in entry: return "Your Bibtex did not include a title field."
-	if not 'author' in entry: return "Your Bibtex did not include an author field."
-	if not 'year' in entry: return "Your Bibtex did not include a year field."
+def check_bibtex_entry(entry, fix = False):
+	"""
+	Check whether an entry is suitable for the database. Returns None if all is ok, else
+	returns a user-readable string describing the error.
+
+	If fix is set to true then will 'fix' any problems by replacing errors with dummy values.
+	This is only useful during testing and development.
+	"""
+	errors = []
+	mandatory = ['id', 'title', 'author', 'year']
+	for f in mandatory:
+		if not f in entry:
+			errors.append("The entry did not include the '" + f + "' field.")
+			if fix:
+				if f == "year":
+					entry['year'] = "2000"
+				else:
+					entry[f] = "No" + f
 	yearstr = entry['year']
 	try:
 		year = int(yearstr)
 	except ValueError:
-		return "Your year field was not a valid year (e.g. 2001, 2014)"
-	#No problems
-	return None
+		errors.append("The year field should be a single integer year, i.e. '2001'.")
+		if fix:
+			entry['year'] = "2000"
+	
+	if len(errors) == 0:
+		return None
+	else:
+		rv = ""
+		for e in errors:
+			rv += e + " "
+		return rv
+
+
+def fix_bulk_bibfile(infilename, outfilename):
+	"""
+	This is not used by the actual site, but is a utility function that can be called from 
+	the django shell. (python manage.py shell)
+	Will 'fix' common errors in a bulk bibtex file. This is no substitute for manually editing
+	however, and is really only useful during testing and development.
+	"""
+	with open(infilename) as bibtex_file:
+		bibtex_database = bibtexparser.load(bibtex_file)
+		for e in bibtex_database.entries:
+			error = check_bibtex_entry(e, True)
+			if error != None:
+				print "Error in entry " + str(e['id']) + ": " + str(error) + "  fixed."
+	with open(outfilename, "w") as outfile:
+		wr = bibtexparser.bwriter.BibTexWriter()
+		outfile.write(wr.write(bibtex_database).encode('utf-8'))
 
 
 def validate_bulk_bibtex(bibstring):

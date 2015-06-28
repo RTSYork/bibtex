@@ -44,12 +44,15 @@ $(function() {
 
 
 {# Add download link(s) if at least one DocEntry exists for this Entry #}
-{% if docfile_set|length > 0 %}
+{% if docfile_set|length > 0 or entry.downloadurl != "" %}
 <h3>Download</h3>
 <ul class="filelist">
 {% for doc in docfile_set %}
 	<li><a href="{{ftpbase}}{{doc.filename}}">{{doc.filename}}</a></li>
 {% endfor %}
+	{% if entry.downloadurl != "" %}
+		<li><a href="{{entry.downloadurl}}">{{entry.downloadurl}}</a></li>
+	{% endif %}
 </ul>
 {% endif %}
 

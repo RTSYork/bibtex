@@ -1,6 +1,17 @@
+@font-face{
+    font-family: "gillsans-light";
+    src: url('fonts/gillsans-light.ttf'),
+    url('fonts/gillsans-light.eot'); /* IE */
+}
+
+
 body {
+	font-family: "Open Sans", sans-serif;
+	font-weight: 400;
+	font-size: 1em;
+
+	text-rendering: optimizeLegibility;
 	background-color: white;
-	font-family: Sans-Serif;
 	color: #333333;
 	margin: 0;
 }
@@ -19,7 +30,14 @@ a:visited {
 }
 
 h1 {
+	font-family: "gillsans-light", sans-serif;
+	font-weight: 400;
 	border-bottom: 1px solid black;
+}
+
+h2 {
+	font-family: "gillsans-light", sans-serif;
+	font-weight: 400;
 }
 
 h3 {

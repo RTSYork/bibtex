@@ -7,6 +7,7 @@ urlpatterns = patterns('',
 	url(r'^$', views.index, name='index'),
 	url(r'^detail/(?P<epk>\d+)/$', views.detail, name='detail'),
 	url(r'^api/$', views.api, name='api'),
+	url(r'^stats/$', views.stats, name='stats'),
 
 	url(r'^add$', views.add, name='add'),
 	url(r'^edit/(?P<epk>\d+)/$', views.edit, name='edit'),

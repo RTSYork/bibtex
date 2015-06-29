@@ -1,0 +1,36 @@
+{% extends 'bibtex/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<script src="{% static 'lib/jquery.canvasjs.min.js' %}"></script>
+
+<script>
+$(document).ready(function() {
+	var datap = {{data}}
+
+	chartsettings = {
+		title: {text: "Publications per year"},
+		animationEnabled: true,
+		axisY: {
+			title: "Publications",
+			interlacedColor: "#eeeeee",
+			lineThickness: 2, 
+			lineColor: "#BBBBBB"
+		},
+		theme: "theme1",
+		data: [{type: "line", dataPoints: datap}]
+	}
+
+	var chart = new CanvasJS.Chart("pubyearchart", chartsettings);
+	chart.render();
+});
+</script>
+
+<h1>Statistics</h1>
+
+
+<div><p><a href="{% url 'bibtex:index' %}">Back to index</a></p></div>
+<div id="pubyearchart" class="chartdiv"></div>
+
+{% endblock %}
+

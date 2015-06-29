@@ -34,6 +34,20 @@ def api(request):
 	return render(request, 'bibtex/api.html', {'maintainer': bibsettings.maintainer})
 
 
+def stats(request):
+	fromyear = Entry.objects.order_by('year')[0].year
+	toyear = Entry.objects.order_by('-year')[0].year
+
+	data = "[\n"
+	for i in range(fromyear, toyear+1):
+		count = len(Entry.objects.filter(year=i))
+
+		data += "\t{ label: " + str(i) + ", y: " + str(count) + " },\n"
+	data += "];\n"
+
+	return render(request, 'bibtex/stats.html', {'data': data})
+
+
 def detail(request, epk):
 	entry = get_object_or_404(Entry, pk=epk)
 	return render(request, 'bibtex/detail.html', {

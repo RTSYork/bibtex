@@ -31,7 +31,7 @@ def view(request):
 	)
 
 def api(request):
-	return render(request, 'bibtex/api.html', {'maintainer': bibsettings.maintainer})
+	return render(request, 'bibtex/api.html', {'maintainer': bibsettings.maintainer, 'meta': request.META})
 
 
 def stats(request):

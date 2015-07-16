@@ -133,6 +133,7 @@ $(function() {
 	$(".submit").each(function(index) {
 		$(this).click(function() {
 			$(this).addClass("submitdisabled");
+			$(this).value = "Please wait...";
 		});
 	});
 
@@ -269,7 +270,7 @@ $(function() {
 <input type="hidden" name="pk" value={{entry.pk}}>
 <input type="file" name="file"><br>
 <div class="centre">
-	<input type="submit" class="submit" value="Upload">
+	<input type="submit" class="submit fileuploadbutton" value="Upload">
 </div>
 </form>
 </div>

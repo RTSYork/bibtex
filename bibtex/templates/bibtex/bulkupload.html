@@ -29,6 +29,7 @@ $(function() {
 	$(".submit").each(function(index) {
 		$(this).click(function() {
 			$(this).addClass("submitdisabled");
+			$(this).value = "Please wait...";
 		});
 	});
 });

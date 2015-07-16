@@ -10,6 +10,11 @@ if(!String.prototype.startsWith){
 function reenableSubmitButtons() {
 	$(".submit").each(function(index) {
 		$(this).removeClass("submitdisabled");
+		if($(this).hasClass("fileuploadbutton")) {
+			$(this).value = "Upload" 
+		} else {
+			$(this).value = "Submit" 
+		}
 	});
 }
 

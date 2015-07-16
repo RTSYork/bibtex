@@ -131,10 +131,9 @@ def write_file(uploadedfile, origfilename):
 			outfname = name + ext
 
 		path = default_storage.save(outfname, ContentFile(uploadedfile.read()))
-		print path
 		return (True, path)
 	except Exception as e:
-		return (False, str(e.message))
+		return (False, str(e))
 
 
 def get_username(request):

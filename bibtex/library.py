@@ -117,6 +117,8 @@ def write_file(uploadedfile, origfilename):
 	Write the file into MEDIA_ROOT
 	Will check if there already is a file with that name, and if so, add _x onto the end of the name
 	(but before the extension), where x is a positive integer.
+
+	Returns either (True, uploaded_filename), or (False, error message)
 	"""
 	try:
 		name, ext = os.path.splitext(origfilename)
@@ -130,12 +132,9 @@ def write_file(uploadedfile, origfilename):
 
 		path = default_storage.save(outfname, ContentFile(uploadedfile.read()))
 		print path
-		return path
+		return (True, path)
 	except Exception as e:
-		print str(e.message)
-		#logger = logging.getLogger(__name__)
-		#logger.error(str(e))
-		return None
+		return (False, str(e.message))
 
 
 def get_username(request):

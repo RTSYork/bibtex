@@ -94,12 +94,11 @@ def add_file(request, epk):
 
 		_, ext = os.path.splitext(request.FILES['file']._name) 
 		origfilename = entry.key + ext
-		filename = library.write_file(request.FILES['file'], origfilename)
-
-		if filename != None:
+		ok, filename = library.write_file(request.FILES['file'], origfilename)
+		if ok:
 			doc = Docfile.objects.create(entry = entry, filename = filename)
 		else:
-			return HttpResponse("Error whilst saving file. Please contact the database admin.")
+			return HttpResponse("Error whilst saving file. Please contact the database admin. Error: " + filename)
 		return HttpResponse("OK" + str(filename))
 	else:
 		return HttpResponse("You do not own the entry this file is attached to.")
@@ -233,8 +232,8 @@ def addedit(request):
 	if 'file' in request.FILES:
 		_, ext = os.path.splitext(request.FILES['file']._name) 
 		origfilename = entry.key + ext
-		filename = library.write_file(request.FILES['file'], origfilename)
-		if filename != None:
+		ok, filename = library.write_file(request.FILES['file'], origfilename)
+		if ok:
 			doc = Docfile.objects.create(entry = entry, filename = filename)
 		else:
 			return HttpResponse("BADFILE" + str(entry.pk))

@@ -11,9 +11,9 @@ function reenableSubmitButtons() {
 	$(".submit").each(function(index) {
 		$(this).removeClass("submitdisabled");
 		if($(this).hasClass("fileuploadbutton")) {
-			$(this).value = "Upload" 
+			$(this).val("Upload")
 		} else {
-			$(this).value = "Submit" 
+			$(this).val("Submit")
 		}
 	});
 }

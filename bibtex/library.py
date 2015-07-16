@@ -5,6 +5,8 @@ import re, sys, logging, os, string
 from bibtex.models import Entry, Docfile
 import latextounicode
 
+from csbibtex.settings_secret import *
+
 from django.db.models import Q
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -136,8 +138,17 @@ def write_file(uploadedfile, origfilename):
 		return None
 
 
-def get_username():
-	return "iang"
+def get_username(request):
+	try:
+		username = DEBUG_REMOTE_USER
+	except NameError:
+		if 'HTTP_X_PROXY_REMOTE_USER' in request.META:
+			username = request.META['HTTP_X_PROXY_REMOTE_USER'] 
+		elif 'REMOTE_USER' in request.META:
+			username = request.META['REMOTE_USER']
+		else:
+			username = ""
+	return username
 
 
 def normalize_query(query_string,
@@ -195,7 +206,7 @@ def get_query(query_string, search_fields):
     return query
 
 
-def send_email(db, entry, url):
+def send_email(db, entry, url, request):
 	mailtemplate = """$user has added a new paper to the RTS Bibtex database. It can be viewed at:
 $link
 
@@ -204,7 +215,7 @@ Title: $title
 Author: $author
 """
 	mailbody = string.Template(mailtemplate).substitute({
-		'user': get_username(),
+		'user': get_username(request),
 		'link': url,
 		'title': entry.title,
 		'author': entry.author
@@ -246,7 +257,7 @@ def author_to_bibkey(s):
 		return None
 
 
-def get_new_bibkey(year, author, existingkey=None):
+def get_new_bibkey(year, author, username, existingkey=None):
 	"""
 	Return an unused bibtex key of the format SurnameYear
 	Adds disambiguating letters from 'a' if multiple such keys exist
@@ -254,7 +265,7 @@ def get_new_bibkey(year, author, existingkey=None):
 	"""
 	bibauth = author_to_bibkey(author)
 	if bibauth == None:
-		bibauth = get_username()
+		bibauth = username
 	key = bibauth + str(year)
 	
 	if key != existingkey:
@@ -275,7 +286,7 @@ def get_new_bibkey(year, author, existingkey=None):
 
 def assemble_bib(request):
 	p = request.POST
-	bib = "@" + p['entrytype'] + "{" + get_new_bibkey(request.POST.get('manual_year', 'NoYear'), request.POST.get('manual_author', None)) + ",\n"
+	bib = "@" + p['entrytype'] + "{" + get_new_bibkey(request.POST.get('manual_year', 'NoYear'), request.POST.get('manual_author', None), get_username(request)) + ",\n"
 	for postitem, v in p.iteritems():
 		val = str(v).strip()
 		if postitem.startswith("manual_") and val != "":

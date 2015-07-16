@@ -16,7 +16,7 @@ import bibsettings
 
 def index(request):
 	return render(request, 'bibtex/index.html', {
-			'username': library.get_username(),
+			'username': library.get_username(request),
 			'recent': Entry.objects.order_by('-entered')[:5],
 			'maintainer': bibsettings.maintainer
 		}
@@ -25,8 +25,8 @@ def index(request):
 
 def view(request):
 	return render(request, 'bibtex/view.html', {
-			'username': library.get_username(),
-			'entries': Entry.objects.filter(owner=library.get_username()).order_by('-entered'),
+			'username': library.get_username(request),
+			'entries': Entry.objects.filter(owner=library.get_username(request)).order_by('-entered'),
 		}
 	)
 
@@ -54,14 +54,14 @@ def detail(request, epk):
 		'entry': entry, 
 		'docfile_set': entry.docfile_set.all(),
 		'ftpbase': settings.MEDIA_URL,
-		'owner': (entry.owner == library.get_username()),
+		'owner': (entry.owner == library.get_username(request)),
 	})
 
 
 def add(request):
-	if library.get_username != "":
+	if library.get_username(request) != "":
 		return render(request, 'bibtex/add.html', {
-			'username': library.get_username(),
+			'username': library.get_username(request),
 			'entry': None
 		})
 
@@ -70,7 +70,7 @@ def edit(request, epk):
 	entry = None
 	if epk != None: entry = get_object_or_404(Entry, pk=epk)
 	return render(request, 'bibtex/add.html', {
-		'username': library.get_username(),
+		'username': library.get_username(request),
 		'docfile_set': entry.docfile_set.all(),
 		'ftpbase': settings.MEDIA_URL,
 		'entry': entry
@@ -79,7 +79,7 @@ def edit(request, epk):
 
 def delete_confirm(request, epk):
 	entry = get_object_or_404(Entry, pk=epk)
-	if entry.owner == library.get_username():
+	if entry.owner == library.get_username(request):
 		entry.delete()
 		return HttpResponse("OK")
 	else:
@@ -88,7 +88,7 @@ def delete_confirm(request, epk):
 
 def add_file(request, epk):
 	entry = get_object_or_404(Entry, pk=epk)
-	if entry.owner == library.get_username():
+	if entry.owner == library.get_username(request):
 		if not 'file' in request.FILES:
 			return HttpResponse("No file was submitted.")
 
@@ -108,7 +108,7 @@ def add_file(request, epk):
 def delete_file(request, epk):
 	docfile = get_object_or_404(Docfile, pk=epk)
 	entry = docfile.entry
-	if entry.owner == library.get_username():
+	if entry.owner == library.get_username(request):
 		docfile.delete()
 		return HttpResponse("OK")
 	else:
@@ -174,7 +174,7 @@ def searchkey(request):
 
 
 def addedit(request):
-	if library.get_username() == "":
+	if library.get_username(request) == "":
 		return HttpResponse("Bad request.")
 	if not ((request.POST.get('entryMode', None) == 'raw') or (request.POST.get('entryMode', None) == 'fields')):
 		return HttpResponse("Bad request.")
@@ -196,7 +196,7 @@ def addedit(request):
 		db.entries[0]['abstract'] = ""
 
 	#Update the key based on the author and year, and update the bibtex
-	db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], db.entries[0]['id'])
+	db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], library.get_username(request), db.entries[0]['id'])
 	newdb = bibtexparser.bibdatabase.BibDatabase()
 	newdb.entries.append(db.entries[0])
 
@@ -207,7 +207,7 @@ def addedit(request):
 	if 'edit' in request.POST:
 		#Edit the existing entry
 		entry = get_object_or_404(Entry, pk=request.POST['pk'])
-		if entry.owner == library.get_username():		
+		if entry.owner == library.get_username(request):		
 			entry.entered = datetime.utcnow()
 			entry.key = db.entries[0]['id']
 			entry.title = library.sanitise(db.entries[0]['title'])
@@ -219,7 +219,7 @@ def addedit(request):
 	else:
 		#Add a new entry
 		entry = Entry.objects.create(
-			owner = library.get_username(),
+			owner = library.get_username(request),
 			entered = datetime.utcnow(),
 			key = db.entries[0]['id'],
 			title = library.sanitise(db.entries[0]['title']),
@@ -241,20 +241,20 @@ def addedit(request):
 
 	#Maybe send an email
 	if 'email' in request.POST:
-		library.send_email(db, entry, request.build_absolute_uri(reverse('bibtex:detail', args=[entry.pk])))
+		library.send_email(db, entry, request.build_absolute_uri(reverse('bibtex:detail', args=[entry.pk])), request)
 
 	return HttpResponse("OK" + str(entry.pk))
 
 
 def bulkupload(request):
-	if library.get_username != "":
+	if library.get_username(request) != "":
 		return render(request, 'bibtex/bulkupload.html', {
-			'username': library.get_username(),
+			'username': library.get_username(request),
 			'maintainer': bibsettings.maintainer
 		})
 
 def bulkuploadadd(request):
-	if library.get_username() == "":
+	if library.get_username(request) == "":
 		return HttpResponse("Bad request.")
 	if not 'file' in request.FILES:
 		return HttpResponse("No file was submitted.")
@@ -271,7 +271,7 @@ def bulkuploadadd(request):
 		if not 'abstract' in bibe:
 			bibe['abstract'] = ""
 		origkey = bibe['id']
-		bibe['id'] = library.get_new_bibkey(bibe['year'], bibe['author'])
+		bibe['id'] = library.get_new_bibkey(bibe['year'], bibe['author'], library.get_username(request))
 
 		#Some fields are not supposed to appear in the raw bibtex
 		datafields = ['image_url', 'abstract_html', 'download_url']
@@ -299,7 +299,7 @@ def bulkuploadadd(request):
 			etime = datetime.utcnow()
 
 		entry = Entry.objects.create(
-			owner = library.get_username(),
+			owner = library.get_username(request),
 			entered = etime,
 			key = bibe['id'],
 			title = library.sanitise(bibe['title']),

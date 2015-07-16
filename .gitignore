@@ -1,4 +1,4 @@
-db.sqlite3
+db/db.sqlite3
 csbibtex/settings_secret.py
 reload
 

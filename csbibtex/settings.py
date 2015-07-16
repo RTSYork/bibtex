@@ -82,9 +82,8 @@ STATIC_URL = '/rts/static/'
 
 
 # File storage
-
-MEDIA_ROOT = "/Users/ian/Downloads/ftp/"
-MEDIA_URL = "ftp://ftp.cs.york.ac.uk/papers/rtspapers/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "bibtex", "static", "papers")
+MEDIA_URL = STATIC_URL + "papers/"
 
 
 # Email

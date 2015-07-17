@@ -13,5 +13,5 @@ maintainer = {
 enable_email = True
 #target_email_address = 'rts-group@york.ac.uk'
 target_email_address = 'ian.gray@york.ac.uk'
-#from_email_address = 'RTS Bibtex Database <rtsbibtex-no-reply@cs.york.ac.uk>'
-from_email_address = 'rtsbibtex-no-reply@cs.york.ac.uk'
+from_email_address = 'RTS Bibtex Database <csci669@york.ac.uk>'
+

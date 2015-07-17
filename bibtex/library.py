@@ -206,6 +206,10 @@ def get_query(query_string, search_fields):
 
 
 def send_email(db, entry, url, request):
+	ef = open(os.path.join(MEDIA_ROOT, "emailing", "w"))
+	ef.write("Emailing!\n")
+	ef.close()
+
 	mailtemplate = """$user has added a new paper to the RTS Bibtex database. It can be viewed at:
 $link
 
@@ -231,8 +235,11 @@ Author: $author
 				bibsettings.from_email_address, 
 				[bibsettings.target_email_address],
 				fail_silently=False)
-	except:
-		pass
+	except Exception as e:
+		ef = open(os.path.join(MEDIA_ROOT, "errorlog", "w"))
+		ef.write("Error:\n")
+		ef.write(str(e))
+		ef.close()
 
 
 def author_to_bibkey(s):

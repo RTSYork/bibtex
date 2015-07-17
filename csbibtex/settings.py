@@ -88,6 +88,6 @@ MEDIA_URL = STATIC_URL + "papers/"
 
 # Email
 EMAIL_HOST = "smtp.york.ac.uk"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 25
+EMAIL_USE_TLS = False
 EMAIL_USE_SSL = False

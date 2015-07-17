@@ -1,4 +1,5 @@
 import bibtexparser
+import bibsettings
 from bibtexparser.bparser import BibTexParser
 import re, sys, logging, os, string
 
@@ -224,12 +225,12 @@ Author: $author
 	mailbody = mailbody + "\n\nBibtex: " + entry.bib + "\n"
 
 	try:
-		pass
-		#send_mail("New paper published", 
-		#	mailbody, 
-		#	'rtsbibtex-no-reply@cs.york.ac.uk', 
-		#	['rts-group@york.ac.uk'],
-		#	fail_silently=False)
+		if bibsettings.enable_email:
+			send_mail("New paper published", 
+				mailbody, 
+				bibsettings.from_email_address, 
+				[bibsettings.target_email_address],
+				fail_silently=False)
 	except:
 		pass
 

@@ -206,7 +206,7 @@ def get_query(query_string, search_fields):
 
 
 def send_email(db, entry, url, request):
-	ef = open(os.path.join(MEDIA_ROOT, "emailing", "w"))
+	ef = open(os.path.join(settings.MEDIA_ROOT, "emailing", "w"))
 	ef.write("Emailing!\n")
 	ef.close()
 
@@ -236,7 +236,7 @@ Author: $author
 				[bibsettings.target_email_address],
 				fail_silently=False)
 	except Exception as e:
-		ef = open(os.path.join(MEDIA_ROOT, "errorlog", "w"))
+		ef = open(os.path.join(settings.MEDIA_ROOT, "errorlog", "w"))
 		ef.write("Error:\n")
 		ef.write(str(e))
 		ef.close()

@@ -225,6 +225,13 @@ Author: $author
 		mailbody = mailbody + "Abstract: " + entry.abstract + "\n"
 	mailbody = mailbody + "\n\nBibtex: " + entry.bib + "\n"
 
+
+	try:
+		if DEBUG_DISABLE_EMAIL:
+			return
+	except NameError:
+		pass
+
 	try:
 		if bibsettings.enable_email:
 			send_mail("New paper published", 

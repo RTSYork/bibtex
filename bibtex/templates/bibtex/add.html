@@ -52,6 +52,11 @@ function handleServerResponseAddFile(text, responseText, statusText, xhr, $form)
 	} else swalError(text);
 }
 
+function handleError(text, responseText, statusText, xhr, $form) {
+	reenableSubmitButtons();
+	swalError(text);
+}
+
 function deleteResponse(data) {
 	reenableSubmitButtons();
 	if(data == "OK") {
@@ -121,8 +126,8 @@ $(function() {
 		$("input#entryMode").val("fields")
 	});
 
-	$("#bibtexaddform").ajaxForm({beforeSubmit: validate, success: handleServerResponse});
-	$("#fileaddform").ajaxForm({beforeSubmit: validateAddFile, success: handleServerResponseAddFile});
+	$("#bibtexaddform").ajaxForm({beforeSubmit: validate, success: handleServerResponse, error: handleError});
+	$("#fileaddform").ajaxForm({beforeSubmit: validateAddFile, success: handleServerResponseAddFile, error: handleError});
 
 	$('input[name="entrytype"]').each(function(index) {
 		$(this).click(function() {

@@ -6,6 +6,17 @@
 
 function goBack() { window.location = "{% url 'bibtex:index' %}"; }
 
+function reenableSubmitButtons() {
+	$(".submit").each(function(index) {
+		$(this).removeClass("submitdisabled");
+		if($(this).hasClass("fileuploadbutton")) {
+			$(this).val("Upload")
+		} else {
+			$(this).val("Submit")
+		}
+	});
+}
+
 function validateAddFile(data, jqForm, options) {
 	for(var i = 0; i < data.length; i++) {
 		if(data[i].name == "file" && data[i].value == "") {

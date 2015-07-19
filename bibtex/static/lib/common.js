@@ -7,17 +7,6 @@ if(!String.prototype.startsWith){
 	}
 }
 
-function reenableSubmitButtons() {
-	$(".submit").each(function(index) {
-		$(this).removeClass("submitdisabled");
-		if($(this).hasClass("fileuploadbutton")) {
-			$(this).val("Upload")
-		} else {
-			$(this).val("Submit")
-		}
-	});
-}
-
 function swalError(error) {
 	swal({
 		title: "Error!", 

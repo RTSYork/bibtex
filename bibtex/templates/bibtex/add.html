@@ -10,16 +10,31 @@
 
 var typingTimer;
 var doneTypingInterval = 700;
+var buttonsEnabled = true;
 
 function goBack() { window.location = "{% url 'bibtex:index' %}"; }
 
+function reenableSubmitButtons() {
+	$(".submit").each(function(index) {
+		$(this).removeClass("submitdisabled");
+		if($(this).hasClass("fileuploadbutton")) {
+			$(this).val("Upload")
+		} else {
+			$(this).val("Submit")
+		}
+	});
+	buttonsEnabled = true;
+}
+
+
 function handleServerResponse(text, responseText, statusText, xhr, $form) {
+	reenableSubmitButtons();
+
 	{% if not entry %}
 	var msgtext = "Paper sucessfully added to the database";
 	{% else %}
 	var msgtext = "Entry sucessfully edited";
 	{% endif %}
-	reenableSubmitButtons();
 
 	if(text.startsWith("BADFILE")) {
 		swal({title: "Warning", 
@@ -46,7 +61,7 @@ function deleteResponse(data) {
 			window.location = "{% url 'bibtex:index' %}";
 		{% endif %}
 	} else {
-		swalError(text);		
+		swalError(data);		
 	}
 }
 
@@ -132,8 +147,11 @@ $(function() {
 	
 	$(".submit").each(function(index) {
 		$(this).click(function() {
-			$(this).addClass("submitdisabled");
-			$(this).val("Please wait...");
+			if(buttonsEnabled) {
+				buttonsEnabled = false;
+				$(this).addClass("submitdisabled");
+				$(this).val("Please wait...");
+			}
 		});
 	});
 

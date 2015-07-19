@@ -53,13 +53,14 @@ def check_bibtex_entry(entry, fix = False):
 					entry['year'] = "2000"
 				else:
 					entry[f] = "No" + f
-	yearstr = entry['year']
-	try:
-		year = int(yearstr)
-	except ValueError:
-		errors.append("The year field should be a single integer year, i.e. '2001'.")
-		if fix:
-			entry['year'] = "2000"
+	if 'year' in entry:
+		yearstr = entry['year']
+		try:
+			year = int(yearstr)
+		except ValueError:
+			errors.append("The year field should be a single integer year, i.e. '2001'.")
+			if fix:
+				entry['year'] = "2000"
 	
 	if len(errors) == 0:
 		return None

@@ -8,8 +8,6 @@
 <script>
 "use strict";
 
-var typingTimer;
-var doneTypingInterval = 700;
 var buttonsEnabled = true;
 
 function goBack() { window.location = "{% url 'bibtex:index' %}"; }
@@ -160,14 +158,6 @@ $(function() {
 		});
 	});
 
-	{% if not entry %}
-	$('textarea#rawbibtexentry').keyup(function() {
-		clearTimeout(typingTimer);
-		if ($('textarea#rawbibtexentry').val) {
-			typingTimer = setTimeout(checkBibtexKeyLive, doneTypingInterval);
-		}
-	});
-	{% endif %}
 })
 
 

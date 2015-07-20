@@ -304,13 +304,13 @@ def get_new_bibkey(year, author, username, existingkey=None):
 
 def assemble_bib(request):
 	p = request.POST
-	bib = "@" + p['entrytype'] + "{" + get_new_bibkey(request.POST.get('manual_year', 'NoYear'), request.POST.get('manual_author', None), get_username(request)) + ",\n"
+	bib = u"@" + p['entrytype'] + "{" + get_new_bibkey(request.POST.get('manual_year', 'NoYear'), request.POST.get('manual_author', None), get_username(request)) + ",\n"
 	for postitem, v in p.iteritems():
-		val = str(v).strip()
+		val = v.strip()
 		if postitem.startswith("manual_") and val != "":
 			fieldname = postitem[7:]
-			bib = bib + "\t" + fieldname + " = {" + val + "},\n" 
-	bib = bib + "}\n"
+			bib = bib + u"\t" + fieldname + u" = {" + val + u"},\n" 
+	bib = bib + u"}\n"
 	return bib
 
 

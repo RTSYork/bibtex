@@ -261,6 +261,7 @@ $(function() {
 	{% else %}
 		{# Can upload a file along with a new entry #}
 		<div><label for="file">Upload file</label></div>
+		<p class="smallnote">Please note: Because of the server we have been assigned, file uploads can be very slow. Please be patient.</p>
 		<input type="file" name="file">
 
 		<p><div><input type="checkbox" name="email" value="email" checked>
@@ -280,6 +281,7 @@ $(function() {
 {# Couldn't nest the file upload form, so if in edit mode we create a new one here. #}
 <div class="editbox">
 <div><h3 class="notopmargin">Upload new file for this entry</h3></div><p></p>
+<p class="smallnote">Please note: Because of the server we have been assigned, file uploads can be very slow. Please be patient.</p>
 <form action="{%url 'bibtex:add_file' entry.pk %}" method="post" id="fileaddform" enctype="multipart/form-data">
 {% csrf_token %}
 <input type="hidden" name="pk" value={{entry.pk}}>

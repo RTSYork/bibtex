@@ -8,8 +8,6 @@
 <script>
 "use strict";
 
-var buttonsEnabled = true;
-
 function goBack() { window.location = "{% url 'bibtex:index' %}"; }
 
 function reenableSubmitButtons() {
@@ -20,8 +18,10 @@ function reenableSubmitButtons() {
 		} else {
 			$(this).val("Submit")
 		}
+		this.disabled = false;
+		console.log("@@@@@ Enabling");
+
 	});
-	buttonsEnabled = true;
 }
 
 
@@ -72,10 +72,16 @@ function validateAddFile(data, jqForm, options) {
 	for(var i = 0; i < data.length; i++) {
 		if(data[i].name == "file" && data[i].value == "") {
 			swalError("Please select a file to upload.");
-			reenableSubmitButtons();
 			return false;
 		}
 	}
+
+	$("#fileaddform .submit").each(function () { 
+		this.disabled = true;
+		$(this).addClass("submitdisabled");
+		$(this).val("Please wait...");
+	});
+
 	return true;
 }
 
@@ -86,7 +92,14 @@ function validate(data, jqForm, options) {
 			swalError("Field '" + name + "' must not be empty.");
 			reenableSubmitButtons();
 			return false;
-		} 
+		}
+
+		$("#bibtexaddform .submit").each(function () { 
+			this.disabled = true;
+			$(this).addClass("submitdisabled");
+			$(this).val("Please wait...");
+		});
+
 		return true;
 	}
 
@@ -147,17 +160,6 @@ $(function() {
 			});
 		});
 	});
-	
-	$(".submit").each(function(index) {
-		$(this).click(function() {
-			if(buttonsEnabled) {
-				buttonsEnabled = false;
-				$(this).addClass("submitdisabled");
-				$(this).val("Please wait...");
-			}
-		});
-	});
-
 })
 
 

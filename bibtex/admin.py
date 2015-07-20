@@ -11,6 +11,8 @@ class EntryAdmin(admin.ModelAdmin):
 		'num_attached_files',
 		'has_abstract'
 	)
+	list_filter = ['year', 'entered']
+	search_fields = ['key', 'owner', 'author', 'title', 'abstract']
 
 class DocfileAdmin(admin.ModelAdmin):
 	pass

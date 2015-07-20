@@ -195,7 +195,11 @@ def addedit(request):
 		db.entries[0]['abstract'] = ""
 
 	#Update the key based on the author and year, and update the bibtex
-	db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], library.get_username(request), db.entries[0]['id'])
+	#If Editing, we can keep the same key. If not, we generate an unused one.
+	if 'edit' in request.POST:
+		db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], library.get_username(request), db.entries[0]['id'])
+	else:
+		db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], library.get_username(request))
 	newdb = bibtexparser.bibdatabase.BibDatabase()
 	newdb.entries.append(db.entries[0])
 

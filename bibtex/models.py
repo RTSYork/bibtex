@@ -21,9 +21,9 @@ class Entry(models.Model):
 	bib = models.TextField()
 
 	#Additional information requested for the main website
-	imgurl = models.CharField(max_length=100, default="")
-	html = models.TextField(default="")
-	downloadurl = models.CharField(max_length=200, default="")
+	imgurl = models.CharField(max_length=100, default="", blank=True)
+	html = models.TextField(default="", blank=True)
+	downloadurl = models.CharField(max_length=200, default="", blank=True)
 
 	def num_attached_files(self):
 		return len(self.docfile_set.all())

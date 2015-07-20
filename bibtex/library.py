@@ -273,25 +273,33 @@ def get_new_bibkey(year, author, username, existingkey=None):
 	Adds disambiguating letters from 'a' if multiple such keys exist
 	If existingkey is not None, then we won't check for conflicts against existingkey
 	"""
+
+	def check_key_ok(keytocheck, allowed_key):
+		if keytocheck == allowed_key:
+			return True
+		if len(Entry.objects.filter(key=key)) == 0:
+			return True
+		return False
+
 	bibauth = author_to_bibkey(author)
 	if bibauth == None:
 		bibauth = username
 	key = bibauth + str(year)
 	
-	if key != existingkey:
-		if len(Entry.objects.filter(key=key)) > 0:
-			disamb = 1
-			key = key + chr(96 + disamb) #chr(97) == 'a'
-			while len(Entry.objects.filter(key=key)) > 0: #while that key exists in the db
-				if disamb == 26:
-					#if this code ever triggers, someone has been very productive!
-					disamb = 1
-					key = key[:-1]
-					key = key + 'aa'
-				else:
-					disamb = disamb + 1
-					key = key[:-1]
-					key = key + chr(96 + disamb)
+	if not check_key_ok(key, existingkey):
+		disamb = 1
+		key = key + chr(96 + disamb) #chr(97) == 'a'
+		while not check_key_ok(key, existingkey):
+			if disamb == 26:
+				#if this code ever triggers, someone has been very productive!
+				disamb = 1
+				key = key[:-1]
+				key = key + 'aa'
+			else:
+				disamb = disamb + 1
+				key = key[:-1]
+				key = key + chr(96 + disamb)
+
 	return key
 
 def assemble_bib(request):

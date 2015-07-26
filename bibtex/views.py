@@ -71,7 +71,7 @@ def deldups(request):
 						repl = df.filename[1:].replace(':', '')
 						repl = os.path.splitext(repl)[0]
 						if len(Entry.objects.filter(key = repl)) > 0:
-							dup.add("Remove " + str(df) + " from " + str(item))
+							dup.add("Remove " + str(df.filename) + " from " + str(item))
 				except ValueError:
 					pass
 	return render(request, 'bibtex/dups.html', {'dups': dup})

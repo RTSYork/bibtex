@@ -1,0 +1,15 @@
+{% extends 'bibtex/base.html' %}
+{% block content %}
+
+<h1>Duplicate removal</h1>
+
+<ul>
+{% for e in dups %}
+	<li>{{e}}</li>
+{% endfor %}
+</ul>
+
+<p><a href="{% url 'bibtex:index' %}">Back</a></p>
+
+{% endblock %}
+

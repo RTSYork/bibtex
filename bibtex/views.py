@@ -58,6 +58,25 @@ def detail(request, epk):
 	})
 
 
+def deldups(request):
+	dup = set()
+	for item in Entry.objects.all():
+		count = len(item.docfile_set.all())
+		if count > 1:
+			for df in item.docfile_set.all():
+				try:
+					year = int(item.key[-4:])
+					name = item.key[:-4]
+					if not df.filename.startswith('R:' + name + ":" + str(year) + "."):
+						repl = df.filename[1:].replace(':', '')
+						repl = os.path.splitext(repl)[0]
+						if len(Entry.objects.filter(key = repl)) > 0:
+							dup.add("Remove " + str(df) + " from " + str(item))
+				except ValueError:
+					pass
+	return render(request, 'bibtex/dups.html', {'dups': dup})
+
+
 def add(request):
 	if library.get_username(request) != "":
 		return render(request, 'bibtex/add.html', {

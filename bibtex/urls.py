@@ -25,4 +25,6 @@ urlpatterns = patterns('',
 	url(r'^searchkey$', views.searchkey, name='searchkey'),
 
 	url(r'^addedit$', views.addedit, name='addedit'),
+
+	url(r'^deldups$', views.deldups, name='deldups'),
 )

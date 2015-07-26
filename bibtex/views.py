@@ -67,11 +67,13 @@ def deldups(request):
 				try:
 					year = int(item.key[-4:])
 					name = item.key[:-4]
-					if not df.filename.startswith('R:' + name + ":" + str(year) + "."):
-						repl = df.filename[1:].replace(':', '')
-						repl = os.path.splitext(repl)[0]
-						if len(Entry.objects.filter(key = repl)) > 0:
-							dup.add("Remove " + str(df.filename) + " from " + str(item))
+
+					if len(item.docfile_set.filter(filename = 'R:' + name + ":" + str(year) + ".pdf")) > 0 or len(item.docfile_set.filter(filename = 'R:' + name + ":" + str(year) + ".ps")) > 0:
+						if not df.filename.startswith('R:' + name + ":" + str(year) + "."):
+							repl = df.filename[1:].replace(':', '')
+							repl = os.path.splitext(repl)[0]
+							if len(Entry.objects.filter(key = repl)) > 0:
+								dup.add("Remove " + str(df.filename) + " from " + str(item))
 				except ValueError:
 					pass
 	return render(request, 'bibtex/dups.html', {'dups': dup})

@@ -27,16 +27,19 @@ class FileNumFilter(admin.SimpleListFilter):
 		)
 
 	def queryset(self, request, queryset):
-		rv = set()
-		for item in queryset:
-			count = len(item.docfile_set.all())
-			if self.value() == '0' and count == 0:
-				rv.add(item.pk)
-			elif self.value() == '1' and count == 1:
-				rv.add(item.pk)
-			elif self.value() == 'more' and count > 1:
-				rv.add(item.pk)
-		return queryset.filter(pk__in = rv)
+		if self.value() == '0' or self.value() == '1' or self.value() == 'more':
+			rv = set()
+			for item in queryset:
+				count = len(item.docfile_set.all())
+				if self.value() == '0' and count == 0:
+					rv.add(item.pk)
+				elif self.value() == '1' and count == 1:
+					rv.add(item.pk)
+				elif self.value() == 'more' and count > 1:
+					rv.add(item.pk)
+			return queryset.filter(pk__in = rv)
+		else:
+			return queryset
 
 
 

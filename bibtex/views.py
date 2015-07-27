@@ -172,6 +172,14 @@ def searchkey(request):
 			return HttpResponse("NO")
 
 
+def filedetails(request):
+	rv = []
+	for entry in Entry.objects.all():
+		for df in entry.docfile_set.all():
+			rv.append((entry.key, entry.title, df.filename))
+	return HttpResponse(rv)
+
+
 def addedit(request):
 	if library.get_username(request) == "":
 		return HttpResponse("Bad request.")

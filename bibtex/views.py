@@ -177,7 +177,7 @@ def filedetails(request):
 	for entry in Entry.objects.all():
 		for df in entry.docfile_set.all():
 			rv.append((entry.key, entry.title, df.filename))
-	return HttpResponse(rv)
+	return HttpResponse(str(rv))
 
 
 def addedit(request):

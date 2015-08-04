@@ -16,11 +16,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 from csbibtex.settings_secret import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
 
-TEMPLATE_DEBUG = True
+#TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition

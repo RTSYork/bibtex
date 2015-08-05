@@ -252,7 +252,12 @@ def addedit(request):
 
 	#Maybe send an email
 	if 'email' in request.POST:
-		library.send_email(db, entry, request.build_absolute_uri(reverse('bibtex:detail', args=[entry.pk])), request)
+		#print request.META
+		#if bibsettings.base_host_address.endswith('/'):
+		#	bibsettings.base_host_address = bibsettings.base_host_address[:-1]
+		#url = bibsettings.base_host_address + reverse('bibtex:detail', args=[entry.pk])
+		url = request.META['HTTP_ORIGIN'] + reverse('bibtex:detail', args=[entry.pk])
+		library.send_email(db, entry, url, request)
 
 	return HttpResponse("OK" + str(entry.pk))
 

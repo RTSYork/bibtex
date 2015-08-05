@@ -228,6 +228,7 @@ Author: $author
 
 	try:
 		if DEBUG_DISABLE_EMAIL:
+			print "EMAIL: \n" + mailbody + "\n----\n"
 			return
 	except NameError:
 		pass

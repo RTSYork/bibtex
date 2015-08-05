@@ -1,30 +1,24 @@
 """
 Django settings for csbibtex project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/1.7/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-# SECURITY WARNING: keep the secret key used in production secret!
 from csbibtex.settings_secret import *
 
-# SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
-
-#TEMPLATE_DEBUG = True
+try:
+    if DEBUG_REMOTE_USER != None:
+        DEBUG = True
+        TEMPLATE_DEBUG = True
+except NameError:
+    DEBUG = False
+    TEMPLATE_DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
 
 # Application definition
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -46,13 +40,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'csbibtex.urls'
-
 WSGI_APPLICATION = 'csbibtex.wsgi.application'
-
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
-
-# Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -62,29 +51,19 @@ DATABASES = {
 }
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.7/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.7/howto/static-files/
-
 STATIC_URL = '/rts/static/'
-
 
 # File storage
 MEDIA_ROOT = os.path.join(BASE_DIR, "bibtex", "static", "papers")
 MEDIA_URL = STATIC_URL + "papers/"
-
 
 # Email
 EMAIL_HOST = "smtp.york.ac.uk"

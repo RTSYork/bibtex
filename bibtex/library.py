@@ -207,7 +207,14 @@ def get_query(query_string, search_fields):
 
 
 def send_email(db, entry, url, request):
-	mailtemplate = """$user has added a new paper to the RTS Bibtex database. It can be viewed at:
+	def enforce_unicode(s):
+		if type(s) == type(u''):
+			return s
+		else:
+			return unicode(s, 'utf-8')
+
+
+	mailtemplate = u"""$user has added a new paper to the RTS Bibtex database. It can be viewed at:
 $link
 
 Paper details:
@@ -221,14 +228,16 @@ Author: $author
 		'author': entry.author
 	})
 
-	if entry.abstract != "":
-		mailbody = mailbody + "Abstract: " + entry.abstract + "\n"
-	mailbody = mailbody + "\n\nBibtex: " + entry.bib + "\n"
+	abstract = enforce_unicode(entry.abstract)
+	bib = enforce_unicode(entry.bib)
 
+	if abstract != "":
+		mailbody = mailbody + u"Abstract: " + abstract + u"\n"
+	mailbody = mailbody + u"\n\nBibtex: " + bib + u"\n"
 
 	try:
 		if DEBUG_DISABLE_EMAIL:
-			print "EMAIL: \n" + mailbody + "\n----\n"
+			print u"EMAIL: \n" + mailbody + u"\n----\n"
 			return
 	except NameError:
 		pass

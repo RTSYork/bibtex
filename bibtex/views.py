@@ -181,81 +181,84 @@ def filedetails(request):
 
 
 def addedit(request):
-	if library.get_username(request) == "":
-		return HttpResponse("Bad request.")
-	if not ((request.POST.get('entryMode', None) == 'raw') or (request.POST.get('entryMode', None) == 'fields')):
-		return HttpResponse("Bad request.")
+	try:
+		if library.get_username(request) == "":
+			return HttpResponse("Bad request.")
+		if not ((request.POST.get('entryMode', None) == 'raw') or (request.POST.get('entryMode', None) == 'fields')):
+			return HttpResponse("Bad request.")
 
-	#If field input, then assemble the bibstring first
-	if request.POST['entryMode'] == 'fields':
-		assembledbib = library.assemble_bib(request)
-	else:
-		assembledbib = request.POST['bib']
-
-	#Validate (and parse) the bibtex string
-	error = library.validate_bibtex(assembledbib)
-	if error:
-		return HttpResponse(error)
-
-	db = library.parse_bibstring(assembledbib)
-
-	if not 'abstract' in db.entries[0]:
-		db.entries[0]['abstract'] = ""
-
-	#Update the key based on the author and year, and update the bibtex
-	#If Editing, we can keep the same key. If not, we generate an unused one.
-	if 'edit' in request.POST:
-		db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], library.get_username(request), db.entries[0]['id'])
-	else:
-		db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], library.get_username(request))
-	newdb = bibtexparser.bibdatabase.BibDatabase()
-	newdb.entries.append(db.entries[0])
-
-	wr = bibtexparser.bwriter.BibTexWriter()
-	assembledbib = wr.write(newdb).encode('utf-8')
-
-	#All ok, add the details
-	if 'edit' in request.POST:
-		#Edit the existing entry
-		entry = get_object_or_404(Entry, pk=request.POST['pk'])
-		if entry.owner == library.get_username(request):		
-			entry.entered = datetime.utcnow()
-			entry.key = db.entries[0]['id']
-			entry.title = library.sanitise(db.entries[0]['title'])
-			entry.author = library.sanitise(db.entries[0]['author'])
-			entry.abstract = db.entries[0]['abstract']
-			entry.year = db.entries[0]['year']
-			entry.bib = assembledbib
-			entry.save()
-	else:
-		#Add a new entry
-		entry = Entry.objects.create(
-			owner = library.get_username(request),
-			entered = datetime.utcnow(),
-			key = db.entries[0]['id'],
-			title = library.sanitise(db.entries[0]['title']),
-			author = library.sanitise(db.entries[0]['author']),
-			abstract = db.entries[0]['abstract'],
-			year = db.entries[0]['year'],
-			bib = assembledbib
-		)
-
-	#Now, do we also have a file to upload?
-	if 'file' in request.FILES:
-		_, ext = os.path.splitext(request.FILES['file']._name) 
-		origfilename = entry.key + ext
-		ok, filename = library.write_file(request.FILES['file'], origfilename)
-		if ok:
-			doc = Docfile.objects.create(entry = entry, filename = filename)
+		#If field input, then assemble the bibstring first
+		if request.POST['entryMode'] == 'fields':
+			assembledbib = library.assemble_bib(request)
 		else:
-			return HttpResponse("BADFILE" + str(entry.pk))
+			assembledbib = request.POST['bib']
 
-	#Maybe send an email
-	if 'email' in request.POST:
-		url = request.META['HTTP_ORIGIN'] + reverse('bibtex:detail', args=[entry.pk])
-		library.send_email(db, entry, url, request)
+		#Validate (and parse) the bibtex string
+		error = library.validate_bibtex(assembledbib)
+		if error:
+			return HttpResponse(error)
 
-	return HttpResponse("OK" + str(entry.pk))
+		db = library.parse_bibstring(assembledbib)
+
+		if not 'abstract' in db.entries[0]:
+			db.entries[0]['abstract'] = ""
+
+		#Update the key based on the author and year, and update the bibtex
+		#If Editing, we can keep the same key. If not, we generate an unused one.
+		if 'edit' in request.POST:
+			db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], library.get_username(request), db.entries[0]['id'])
+		else:
+			db.entries[0]['id'] = library.get_new_bibkey(db.entries[0]['year'], db.entries[0]['author'], library.get_username(request))
+		newdb = bibtexparser.bibdatabase.BibDatabase()
+		newdb.entries.append(db.entries[0])
+
+		wr = bibtexparser.bwriter.BibTexWriter()
+		assembledbib = wr.write(newdb).encode('utf-8')
+
+		#All ok, add the details
+		if 'edit' in request.POST:
+			#Edit the existing entry
+			entry = get_object_or_404(Entry, pk=request.POST['pk'])
+			if entry.owner == library.get_username(request):		
+				entry.entered = datetime.utcnow()
+				entry.key = db.entries[0]['id']
+				entry.title = library.sanitise(db.entries[0]['title'])
+				entry.author = library.sanitise(db.entries[0]['author'])
+				entry.abstract = db.entries[0]['abstract']
+				entry.year = db.entries[0]['year']
+				entry.bib = assembledbib
+				entry.save()
+		else:
+			#Add a new entry
+			entry = Entry.objects.create(
+				owner = library.get_username(request),
+				entered = datetime.utcnow(),
+				key = db.entries[0]['id'],
+				title = library.sanitise(db.entries[0]['title']),
+				author = library.sanitise(db.entries[0]['author']),
+				abstract = db.entries[0]['abstract'],
+				year = db.entries[0]['year'],
+				bib = assembledbib
+			)
+
+		#Now, do we also have a file to upload?
+		if 'file' in request.FILES:
+			_, ext = os.path.splitext(request.FILES['file']._name) 
+			origfilename = entry.key + ext
+			ok, filename = library.write_file(request.FILES['file'], origfilename)
+			if ok:
+				doc = Docfile.objects.create(entry = entry, filename = filename)
+			else:
+				return HttpResponse("BADFILE" + str(entry.pk))
+
+		#Maybe send an email
+		if 'email' in request.POST:
+			url = request.META['HTTP_ORIGIN'] + reverse('bibtex:detail', args=[entry.pk])
+			library.send_email(db, entry, url, request)
+		return HttpResponse("OK" + str(entry.pk))
+		
+	except Exception as e:
+		return HttpResponse("Error whilst processing: " + str(e))
 
 
 def bulkupload(request):

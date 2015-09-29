@@ -1,7 +1,7 @@
 import bibtexparser
 import bibsettings
 from bibtexparser.bparser import BibTexParser
-import re, sys, logging, os, string
+import re, sys, logging, os, string, time
 
 from bibtex.models import Entry, Docfile
 import latextounicode
@@ -252,7 +252,7 @@ Author: $author
 	except Exception as e:
 		ef = open(os.path.join(settings.MEDIA_ROOT, "errorlog"), "w")
 		ef.write("Error:\n")
-		ef.write(str(e))
+		ef.write(time.strftime("%d/%m/%Y %I:%M:%S") + " " + str(e))
 		ef.close()
 
 

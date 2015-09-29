@@ -159,7 +159,7 @@ def getsearch(request):
 		return render(request, 'bibtex/searchresults.html', {'results': found_entries})
 	else:
 		if vars['output'] == 'json':
-			return HttpResponse(json.dumps(library.make_json_serialisable(found_entries)))
+			return HttpResponse(json.dumps(library.make_json_serialisable(found_entries, vars.get('include_abstract', '1')), indent=4))
 		else:
 			return render(request, 'bibtex/searchresults_plain.html', {'results': found_entries, 'output': vars['output']})
 

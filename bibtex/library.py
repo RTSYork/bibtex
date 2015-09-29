@@ -324,7 +324,7 @@ def assemble_bib(request):
 	return bib
 
 
-def make_json_serialisable(found_entries):
+def make_json_serialisable(found_entries, include_abstract):
 	"""
 	Used by the getsearch view to create a JSON output.
 
@@ -340,7 +340,8 @@ def make_json_serialisable(found_entries):
 		item['title'] = e.title
 		item['year'] = e.year
 		item['author'] = e.author 
-		item['abstract'] = e.abstract
+		if include_abstract != '0':
+			item['abstract'] = e.abstract
 		item['bib'] = e.bib
 		item['id'] = e.id
 		item['lastedited'] = str(e.entered)

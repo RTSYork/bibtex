@@ -62,6 +62,7 @@
 }
 </pre>
 <p>As the example shows, the object is named the Bibtex key of the entry, and it contains all stored information about the entry. Note that the <tt>abstract</tt> and <tt>bib</tt> entrys are not shown above for clarity.</p>
+<p>JSON output will include a paper's abstract as both an <tt>abstract</tt> field in the JSON and as part of the papers <tt>bib</tt> entry. You can suppress these <tt>abstract</tt> entries by appending <tt>&include_abstract=0</tt> to the search query.</p>
 
 <h3>Other output formats</h3>
 <p>Other output formats are easy to add. If you have a need, please contact <a href="mailto:{{maintainer.email}}">{{maintainer.name}}</a>.</p>

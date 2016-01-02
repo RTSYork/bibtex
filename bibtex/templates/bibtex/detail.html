@@ -39,6 +39,12 @@ $(function() {
 {# If there is an Abstract entry in the bibtex of the Entry then print it #}
 {% ifnotequal entry.abstract "" %}
 <h3>Abstract</h3>
+
+{# Display image link if it exists (such as the cover image for a book) #}
+{% if entry.imgurl.strip != "" %}
+<img src="{{entry.imgurl}}" align="right">
+{% endif %}
+
 <p class="notopmargin">{{ entry.abstract }} </p>
 {% endifnotequal %}
 

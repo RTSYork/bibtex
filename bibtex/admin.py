@@ -64,6 +64,31 @@ class HasAbstractFilter(admin.SimpleListFilter):
 		else:
 			return queryset
 
+
+entrytypes = ['article', 'book', 'inproceedings', 'incollection', 'misc', 'phdthesis', 'techreport']
+
+class EntryTypeFilter(admin.SimpleListFilter):
+	title = 'entry type'
+	parameter_name = 'entrytype'	
+
+	def lookups(self, request, model_admin):
+		rv = []
+		for i in entrytypes:
+			rv.append((i, i))
+		return tuple(rv)
+
+	def queryset(self, request, queryset):
+		if self.value() in entrytypes:
+			rv = set()
+			for item in queryset:
+				bibs = item.bib.strip()[1:]
+				entrytype = bibs[:bibs.find('{')].strip()
+				if self.value() == entrytype:
+					rv.add(item.pk)
+			return queryset.filter(pk__in = rv)
+		else:
+			return queryset
+
 class EntryAdmin(admin.ModelAdmin):
 	list_display = (
 		'key', 
@@ -75,7 +100,7 @@ class EntryAdmin(admin.ModelAdmin):
 		'has_abstract'
 	)
 
-	list_filter = ['entered', FileNumFilter, HasAbstractFilter, 'year']
+	list_filter = ['entered', FileNumFilter, HasAbstractFilter, EntryTypeFilter, 'year']
 	search_fields = ['key', 'owner', 'author', 'title', 'abstract']
 	inlines = [DocInline]
 

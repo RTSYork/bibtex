@@ -41,7 +41,28 @@ class FileNumFilter(admin.SimpleListFilter):
 		else:
 			return queryset
 
+class HasAbstractFilter(admin.SimpleListFilter):
+	title = 'has abstract'
+	parameter_name = 'hasabstract'
 
+	def lookups(self, request, model_admin):
+		return (
+			('Yes', 'Yes'),
+			('No', 'No'),
+		)
+
+	def queryset(self, request, queryset):
+		if self.value() == 'Yes' or self.value() == 'No':
+			rv = set()
+			for item in queryset:
+				hasabs = item.abstract != ""
+				if self.value() == 'Yes' and hasabs:
+					rv.add(item.pk)
+				elif self.value() == 'No' and not hasabs:
+					rv.add(item.pk)
+			return queryset.filter(pk__in = rv)
+		else:
+			return queryset
 
 class EntryAdmin(admin.ModelAdmin):
 	list_display = (
@@ -54,7 +75,7 @@ class EntryAdmin(admin.ModelAdmin):
 		'has_abstract'
 	)
 
-	list_filter = ['entered', FileNumFilter, 'year']
+	list_filter = ['entered', FileNumFilter, HasAbstractFilter, 'year']
 	search_fields = ['key', 'owner', 'author', 'title', 'abstract']
 	inlines = [DocInline]
 

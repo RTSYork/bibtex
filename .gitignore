@@ -2,6 +2,7 @@ db/db.sqlite3
 csbibtex/settings_secret.py
 bibtex/static/papers/
 reload
+utilscripts
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

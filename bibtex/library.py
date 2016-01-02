@@ -347,7 +347,7 @@ def make_json_serialisable(found_entries, include_abstract):
 		item['lastedited'] = str(e.entered)
 
 		for o in optionals:
-			if getattr(e, o) != "":
+			if getattr(e, o, "") != "":
 				item[o] = getattr(e, o)
 
 		files = []

@@ -164,7 +164,7 @@ def getsearch(request):
 					library.make_json_serialisable(found_entries, vars.get('include_abstract', '1')), 
 					indent=4,
 					ensure_ascii=False
-				))
+				), content_type="application/json")
 		else:
 			return render(request, 'bibtex/searchresults_plain.html', {'results': found_entries, 'output': vars['output']})
 
